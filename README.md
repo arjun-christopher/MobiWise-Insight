@@ -106,6 +106,33 @@ See `requirements.txt` for the full list, including:
 - uuid, logging
 - google-generativeai
 
+## Masked Credentials & Secrets
+For security, all sensitive credentials, API keys, tokens, and secrets in this codebase have been replaced with `****MASKED****`.
+
+**To run this project, you must replace all `****MASKED****` placeholders with your own valid values.**
+
+### How to Update Masked Values
+1. **Find all `****MASKED****` placeholders** in the codebase. These are used for:
+   - Database credentials
+   - Email/SMTP credentials
+   - API keys and tokens (Gemini, Google GenerativeAI, Twilio, Hugging Face, News APIs, etc.)
+   - Any other sensitive values
+2. **Replace each `****MASKED****`** with your actual secret value (e.g., API key, token, password, etc.).
+   - Never commit real secrets to public repositories.
+   - Consider using environment variables or a `.env` file for sensitive data in production.
+
+**Example:**
+```python
+API_KEY = "****MASKED****"  # Replace with your actual API key
+```
+
+**Replace with:**
+```python
+API_KEY = "your-real-api-key-here"
+```
+
+If you have any questions about which values to replace or best practices for secret management, see the Security section above or contact the author.
+
 ## Security
 - Store sensitive data (DB credentials, API keys) in environment variables
 - JWT is used for authentication and session management

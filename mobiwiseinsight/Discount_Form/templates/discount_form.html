@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='discount_styles.css') }}">
+    <title>Discount Offer Form</title>
+    <style>
+        body {
+            text-align: center;
+            padding: 50px;
+        }
+    
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            text-decoration: none;
+            color: #00b4d8;
+            font-weight: bold;
+        }
+    
+        .back-button:hover {
+            color: #0077b6;
+        }
+    
+        .success {
+            color: green;
+        }
+    
+        .error {
+            color: red;
+        }
+    
+        form {
+            margin-top: 35px;
+        }
+    
+        input[type="date"] {
+            width: 60%;
+            /* Ensures consistent width */
+            padding: 9px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            font-size: 16px;
+            appearance: none;
+            /* Removes default browser styling */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            position: relative;
+            /* Allows positioning of the calendar icon */
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%27http://www.w3.org/2000/svg%27 fill%3D%27%23f0f0f0%27 height%3D%2724%27 viewBox%3D%270 96 960 960%27 width%3D%2724%27%3E%3Cpath d%3D%27M180 976q-24 0-42-18t-18-42V366q0-24 18-42t42-18h60v-80q0-17 11.5-28.5T280 186q17 0 28.5 11.5T320 226v80h320v-80q0-17 11.5-28.5T680 186q17 0 28.5 11.5T720 226v80h60q24 0 42 18t18 42v550q0 24-18 42t-42 18H180Zm0-60h600V526H180v390Zm0-450h600V366h-60v40q0 17-11.5 28.5T680 446q-17 0-28.5-11.5T640 406v-40H320v40q0 17-11.5 28.5T280 446q-17 0-28.5-11.5T240 406v-40h-60v100Zm0 450V526v390Zm150-230q25 0 42.5-17.5T390 626q0-25-17.5-42.5T330 566q-25 0-42.5 17.5T270 626q0 25 17.5 42.5T330 686Zm300 0q25 0 42.5-17.5T690 626q0-25-17.5-42.5T630 566q-25 0-42.5 17.5T570 626q0 25 17.5 42.5T630 686Zm-300 150q25 0 42.5-17.5T390 776q0-25-17.5-42.5T330 716q-25 0-42.5 17.5T270 776q0 25 17.5 42.5T330 836Zm300 0q25 0 42.5-17.5T690 776q0-25-17.5-42.5T630 716q-25 0-42.5 17.5T570 776q0 25 17.5 42.5T630 836Z%27/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+    
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+    
+        #error-popup {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Backward arrow button -->
+    <a href='http://127.0.0.1:5003/' class="back-button">←</a>
+
+    <img id="logo" src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+    <br>
+    
+    <!-- Role-Based Form Selection Dropdown -->
+    <div id="form-selector-container" class="form-group" style="display: none; margin-right: 9%;">
+        <label for="form-selector">Select Form</label>
+        <select id="form-selector" onchange="redirectToForm()">
+            <option value="mobile">Mobile Form</option>
+            <option value="offer" selected>Mobile Discount Form</option>
+            <option value="admin">Admin Form</option>
+            <option value="order">Order Management Form</option>
+        </select>
+    </div>
+
+        <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeError()">&times;</span>
+            <div id="error-popup"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Mobile Discount Form</h1>
+
+        <form id="discountForm">
+            <div class="form-group">
+                <label for="DiscountID">Discount ID</label>
+                <input type="text" id="DiscountID" name="DiscountID" required><br>
+            </div>
+            <div class="form-group">
+                <label for="OfferName">Offer Name</label>
+                <input type="text" id="OfferName" name="OfferName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="DiscountPercentage">Discount Percentage</label>
+                <input type="number" id="DiscountPercentage" name="DiscountPercentage" required min="1" max="100">
+            </div>
+
+            <div class="form-group">
+                <label for="StartDate">Start Date</label>
+                <input type="date" id="StartDate" name="StartDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="EndDate">End Date</label>
+                <input type="date" id="EndDate" name="EndDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="MobileID">Mobile ID</label>
+                <input type="text" id="MobileID" name="MobileID" required>
+            </div>
+
+            <!-- Admin ID (hidden and pre-filled) -->
+            <input type="hidden" id="admin_id" name="admin_id" value="{{ admin_id }}" />
+
+            <div class="button-line">
+                <button type="button" onclick="fetchPreviousDiscount()">← Previous</button>
+                <button type="button" onclick="newDiscount()">New</button>
+                <button type="button" onclick="fetchDiscountRecord()">Fetch</button>
+                <button type="button" onclick="saveDiscount()">Save</button>
+                <button type="button" onclick="updateDiscount()">Update</button>
+                <button type="button" onclick="deleteDiscount()">Delete</button>
+                <button type="button" onclick="fetchNextDiscount()">Next →</button>
+            </div>
+        </form>
+        
+        <!-- Success and Error Pop-up Modal -->
+        <div id="messageModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeMessage()">&times;</span>
+                <p id="messageText"></p>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display:none;"></div>
+        <div id="successMessage" class="success-message" style="display:none;"></div>
+    </div>
+
+    <script>
+        function fetchDiscountRecord() {
+            const discountId = document.getElementById('DiscountID').value;
+
+            if (!discountId) {
+                showError("Please enter a Discount ID.");
+                return;
+            }
+
+            fetch('/fetch_discount_record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discount_id: discountId }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Fetched data:", data);  // Log the fetched data
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        closeError(); // Close any open error popups
+
+                        // Safely convert Decimal to number for fields like Discount Percentage
+                        const discountPercentage = parseFloat(data.DISCOUNTPERCENTAGE) || '';
+
+                        // Format datetime to 'YYYY-MM-DD' for Start and End Date
+                        const startDate = data.STARTDATE ? new Date(data.STARTDATE).toISOString().split('T')[0] : '';
+                        const endDate = data.ENDDATE ? new Date(data.ENDDATE).toISOString().split('T')[0] : '';
+
+                        document.getElementById('OfferName').value = data.OFFERNAME || '';
+                        document.getElementById('DiscountPercentage').value = discountPercentage;
+                        document.getElementById('StartDate').value = startDate;
+                        document.getElementById('EndDate').value = endDate;
+                        document.getElementById('MobileID').value = data.MOBILEID || '';
+                    }
+                })
+                .catch(error => {
+                    showError("An unexpected error occurred. Please try again later.");
+                    console.error(error);
+                });
+        }
+
+        // Fetch next discount record based on DiscountID
+        function fetchNextDiscount() {
+            const discountId = document.getElementById('DiscountID').value;
+
+            if (!discountId) {
+                showError("Please enter the current Discount ID.");
+                return;
+            }
+
+            fetch('/fetch_next_discount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discount_id: discountId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Populate form fields with the next record data
+                    document.getElementById('DiscountID').value = data.DISCOUNTID || '';
+                    document.getElementById('OfferName').value = data.OFFERNAME || '';
+                    document.getElementById('DiscountPercentage').value = data.DISCOUNTPERCENTAGE || '';
+                    document.getElementById('StartDate').value = data.STARTDATE ? new Date(data.STARTDATE).toISOString().split('T')[0] : '';
+                    document.getElementById('EndDate').value = data.ENDDATE ? new Date(data.ENDDATE).toISOString().split('T')[0] : '';
+                    document.getElementById('MobileID').value = data.MOBILEID || '';
+
+                    // You can remove the old price logic here if you don't need to show it
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        // Fetch previous discount record based on DiscountID
+        function fetchPreviousDiscount() {
+            const discountId = document.getElementById('DiscountID').value;
+
+            if (!discountId) {
+                showError("Please enter the current Discount ID.");
+                return;
+            }
+
+            fetch('/fetch_previous_discount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discount_id: discountId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Populate form fields with the previous record data
+                    document.getElementById('DiscountID').value = data.DISCOUNTID || '';
+                    document.getElementById('OfferName').value = data.OFFERNAME || '';
+                    document.getElementById('DiscountPercentage').value = data.DISCOUNTPERCENTAGE || '';
+                    document.getElementById('StartDate').value = data.STARTDATE ? new Date(data.STARTDATE).toISOString().split('T')[0] : '';
+                    document.getElementById('EndDate').value = data.ENDDATE ? new Date(data.ENDDATE).toISOString().split('T')[0] : '';
+                    document.getElementById('MobileID').value = data.MOBILEID || '';
+
+                    // You can remove the old price logic here if you don't need to show it
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function saveDiscount() {
+            // Gather form data
+            const discountData = {
+                discount_id: document.getElementById('DiscountID').value,
+                offer_name: document.getElementById('OfferName').value,
+                discount_percentage: document.getElementById('DiscountPercentage').value,
+                start_date: document.getElementById('StartDate').value,
+                end_date: document.getElementById('EndDate').value,
+                mobile_id: document.getElementById('MobileID').value,
+                admin_id: document.getElementById('admin_id').value,  // Assuming the admin_id is hidden and pre-filled
+            };
+
+            // Validate required fields
+            if (!discountData.discount_id || !discountData.offer_name || !discountData.discount_percentage ||
+                !discountData.start_date || !discountData.end_date || !discountData.mobile_id) {
+                showError("All fields are required.");
+                return;
+            }
+
+            // Send data to backend
+            fetch('/save_discount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(discountData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        showSuccess(data.success);
+                        clearFields(); // Clear fields after successful save
+                    }
+                })
+                .catch(error => {
+                    showError("An unexpected error occurred. Please try again later.");
+                    console.error(error);
+                });
+        }
+
+        // Clear all form fields after a successful save
+        function clearFields() {
+            document.getElementById('DiscountID').value = '';
+            document.getElementById('OfferName').value = '';
+            document.getElementById('DiscountPercentage').value = '';
+            document.getElementById('StartDate').value = '';
+            document.getElementById('EndDate').value = '';
+            document.getElementById('MobileID').value = '';
+        }
+
+        function updateDiscount() {
+            // Gather form data
+            const discountData = {
+                discount_id: document.getElementById('DiscountID').value,
+                offer_name: document.getElementById('OfferName').value,
+                discount_percentage: document.getElementById('DiscountPercentage').value,
+                start_date: document.getElementById('StartDate').value,
+                end_date: document.getElementById('EndDate').value,
+                mobile_id: document.getElementById('MobileID').value,
+                admin_id: document.getElementById('admin_id').value,  // Assuming the admin_id is hidden and pre-filled
+            };
+
+            // Validate Discount ID
+            if (!discountData.discount_id) {
+                showError("Discount ID is required to update a record.");
+                return;
+            }
+
+            // Send data to backend
+            fetch('/update_discount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(discountData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        showSuccess(data.success);
+                    }
+                })
+                .catch(() => showError("An unexpected error occurred."));
+        }
+
+        function deleteDiscount() {
+            const discountId = document.getElementById('DiscountID').value;
+
+            // Validate Discount ID
+            if (!discountId) {
+                showError("Please enter the Discount ID to delete.");
+                return;
+            }
+
+            fetch('/delete_discount', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discount_id: discountId }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        showSuccess(data.success);
+                        clearFields(); // Clear the form fields after successful deletion
+                    }
+                })
+                .catch(error => {
+                    showError("An unexpected error occurred. Please try again later.");
+                    console.error(error);
+                });
+        }
+
+        function newDiscount() {
+            // Make an API call to fetch the next Discount ID
+            fetch('/get_next_discount_id', {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    // Set the Discount ID in the form
+                    document.getElementById('DiscountID').value = data.next_id;
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function showMessages(messageContent) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.innerHTML = messageContent; // Display multiple messages
+            modal.style.display = 'flex';
+        }
+
+        function showError(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'red';  // Set error message color to red
+            modal.style.display = 'flex';
+        }
+
+        function showSuccess(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'green';  // Set success message color to green
+            modal.style.display = 'flex';
+        }
+
+        function closeError() {
+            const modal = document.getElementById('errorModal');
+            modal.style.display = 'none';
+        }
+
+        function redirectToForm() {
+            const selectedForm = document.getElementById("form-selector").value;
+
+            if (selectedForm === "mobile") {
+                window.location.href = "http://127.0.0.1:5004/";  // Redirect to the Mobile Form
+            } else if (selectedForm === "offer") {
+                window.location.href = "http://127.0.0.1:5006/";  // Redirect to the Discount Offer Form
+            } else if (selectedForm === "admin") {
+                window.location.href = "http://127.0.0.1:5005/";  // Redirect to Admin Form
+            } else if (selectedForm === "order") {
+                window.location.href = "http://127.0.0.1:5007/";  // Redirect to Admin Form
+            }
+        }
+
+        // Ensure Mobile Form is first & show dropdown based on role
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.role === "Super Admin" || data.role === "Product Manager") {
+                        document.getElementById("form-selector-container").style.display = "block"; // Show dropdown
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    const commitButton = document.querySelector("button[onclick='commitMobile()']");
+                    const offerOption = document.querySelector("#form-selector option[value='offer']");
+                    const adminOption = document.querySelector("#form-selector option[value='admin']");
+                    const orderOption = document.querySelector("#form-selector option[value='order']");
+                    if (data.role === "Data Entry Operator") {
+                        commitButton.disabled = true;
+                        offerOption.disabled = true;
+                        offerOption.style.display = 'none';
+                    }
+                    if (data.role === "Product Manager") {
+                        adminOption.disabled = true;
+                        adminOption.style.display = 'none';
+                        orderOption.disabled = true;
+                        orderOption.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('errorModal')) {
+                closeError();
+            }
+        }
+    </script>
+
+</body>
+
+</html>

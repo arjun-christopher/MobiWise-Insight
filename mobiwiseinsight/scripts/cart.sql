@@ -1,0 +1,10 @@
+-- Sequence
+CREATE SEQUENCE cart_seq START WITH 1 INCREMENT BY 1 NOCACHE;
+
+-- Cart Table
+CREATE TABLE Cart (
+    CartID NUMBER PRIMARY KEY,
+    UserID NUMBER REFERENCES Users(UserID),
+    MobileID NUMBER REFERENCES Mobiles(MobileID),
+    AddedAt DATE DEFAULT SYSDATE
+);

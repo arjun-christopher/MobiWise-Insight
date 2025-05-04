@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <!-- Include Font Awesome for cart icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <title>MobiWise Insight</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='compare_styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home_styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+</head>
+
+<script>
+    function redirectToAllMobiles() {
+        // Check if the current page is NOT 'all-mobiles'
+        if (!window.location.pathname.includes("/all-mobiles")) {
+            window.location.href = "/all-mobiles"; // Redirect only if not already on 'all-mobiles.html'
+        }
+    }
+
+    function toggleProfileMenu() {
+        const dropdown = document.getElementById("profile-dropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    // Optional: Hide dropdown if clicked outside
+    window.addEventListener("click", function (e) {
+        const profile = document.querySelector(".profile-icon");
+        const dropdown = document.getElementById("profile-dropdown");
+        if (!profile.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+    function logout() {
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.reload(); // Refresh to update header
+    }
+</script>
+
+<body>
+    <header>
+        <a href="http://127.0.0.1:5001/">
+            <img src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+        </a>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search Mobiles" onclick="redirectToAllMobiles()">
+            <button id="search-btn">🔍</button>
+        </div>
+        <div id="cart-container">
+            <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
+        </div>
+    </header>
+    
+    <div class="profile-dropdown-wrapper">
+        {% if user %}
+        <div class="user-profile">
+            <div class="profile-icon" onclick="toggleProfileMenu()">{{ user.username[0] | upper }}</div>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <p>Username: <strong>{{ user.username }}</strong></p>
+                <p>Email: <strong>{{ user.email }}</strong></p>
+                <br>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        {% else %}
+        <a href="http://127.0.0.1:5002/" class="login-text" style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
+        {% endif %}
+    </div>
+    
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('homepage') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="{{ url_for('all_mobiles') }}" class="{% if request.path.startswith('/all-mobiles') or request.path.startswith('/mobile-details/') %}active{% endif %}">Mobiles</a></li>
+            <li><a href="{{ url_for('compare_mobiles_page') }}" class="{% if request.path == '/compare-mobiles' %}active{% endif %}">Compare Mobiles</a></li>
+            <li><a href="{{ url_for('order_details') }}"
+                    class="{% if request.path == '/order-details' or request.path == '/order-history' %}active{% endif %}">Orders</a></li>
+            <li><a href="{{ url_for('latest_news') }}" class="{% if request.path == '/latest-news' %}active{% endif %}">Latest News</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="mobile-count-selection">
+            <label for="mobile-count">Number of Mobiles to Compare</label>
+            <select id="mobile-count" onchange="generateComparisonSlots()">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+
+        <div id="comparison-container" class="comparison-container"></div>
+        
+        <br>
+        <div id="user-preference" class="user-preference">
+            <h2>Select Usage Preference</h2>
+            <label><input type="checkbox" class="preference-checkbox" value="gaming"> Gaming</label>
+            <label><input type="checkbox" class="preference-checkbox" value="photography"> Photography</label>
+            <label><input type="checkbox" class="preference-checkbox" value="battery"> Battery Life</label>
+            <label><input type="checkbox" class="preference-checkbox" value="performance"> Performance</label>
+            <label><input type="checkbox" class="preference-checkbox" value="budget"> Budget-Friendly</label>
+            <label><input type="checkbox" class="preference-checkbox" value="display"> Display Quality</label>
+        </div>
+
+        <button id="compare-btn" disabled onclick="compareMobiles()">Compare</button>
+
+        <div id="search-popup" class="popup">
+            <div class="popup-content">
+                <input type="text" id="search-bar" placeholder="Search Mobiles..." oninput="searchMobiles()">
+                <div id="search-results"></div>
+                <button onclick="closeSearch()">Close</button>
+            </div>
+        </div>
+
+        <br>
+        <!-- Section for displaying overall mobile specs -->
+        <h2 id="specs_head">Mobile Specifications</h2>
+        <table id="comparison-table" class="comparison-table">
+            <!-- Filled dynamically with JS -->
+        </table>
+        <br>
+        <!-- Section for displaying the best comparisons -->
+        <h2 id="outcome_head">Comparison Outcome</h2>
+        <table id="comparison-outcome" class="comparison-outcome">
+            <!-- Filled dynamically with JS -->
+        </table>
+        
+        <br>
+
+        <div id="suggestion-result"></div>
+
+        <br>
+
+        <!-- Create Link Button -->
+        <button id="create-link-btn" style="display:none;" onclick="generateShareableLink()">🔗 Create Shareable Link</button>
+
+        <!-- Copy Confirmation Popup -->
+        <div id="copy-popup" style="
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #00b4d8;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 2px solid #0077b6;  /* ✅ Border color added */
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        ">Link copied to clipboard!</div>
+
+    </main>
+    <footer>
+        <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='compare_script.js') }}"></script>
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+</body>
+</html>

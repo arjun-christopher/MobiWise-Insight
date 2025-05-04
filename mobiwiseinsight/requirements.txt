@@ -1,0 +1,15 @@
+Flask
+pyodbc
+requests
+apscheduler
+flask-compress
+flask-caching
+python-jwt
+pywhatkit
+pygame
+smtplib
+python-decimal
+email
+uuid
+logging
+google-generativeai

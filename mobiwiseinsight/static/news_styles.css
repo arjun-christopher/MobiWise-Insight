@@ -1,0 +1,88 @@
+/* Color Palette */
+:root {
+    --dark-blue: #03045e;
+    --blue: #0077b6;
+    --light-blue: #00b4d8;
+    --soft-blue: #90e0ef;
+    --aqua: #caf0f8;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Fade-in Effect for News Cards */
+.fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#news-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+}
+
+.news-card {
+    width: 300px;
+    background: var(--aqua);
+    margin: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.news-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.news-card h2 {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+.news-card p {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.news-date {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+}
+
+.news-card a {
+    display: block;
+    margin-top: 10px;
+    color: #0077b6;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.news-card a:hover {
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+    #news-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .news-card {
+        width: 90%;
+    }
+}

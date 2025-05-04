@@ -1,0 +1,247 @@
+:root {
+    --dark-blue: #03045e;
+    --blue: #0077b6;
+    --light-blue: #00b4d8;
+    --soft-blue: #90e0ef;
+    --aqua: #caf0f8;
+}
+
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--dark-blue);
+    background: #f8f9fa;
+    margin: 0;
+    text-align: center;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1 {
+    color: var(--blue);
+    font-size: 2.5em;
+    margin-top: 20px;
+}
+
+h2, h3 {
+    color: var(--light-blue);
+    text-align: center;
+    margin: 10px 0;
+}
+
+.container {
+    background-color: rgba(35, 35, 35, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 90%;
+}
+
+/* Buttons */
+.button {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    font-size: 16px;
+    background-color: var(--light-blue);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.button:hover {
+    background-color: var(--blue);
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto; /* Adjusted margin to move the pop-up higher */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    text-align: center;
+    position: relative;
+    top: -50px; /* Move the pop-up upwards */
+}
+
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+#logo{
+    width: 38%;
+    height: auto;
+} 
+
+/* Form Fields */
+input[type="text"], input[type="password"], input[type="email"], input[type="submit"] {
+    width: 90%;
+    max-width: 300px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--light-blue);
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+input[type="submit"] {
+    background-color: var(--light-blue);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: var(--blue);
+}
+
+.authenticity {
+    text-decoration: none;
+}
+
+.authenticity:hover {
+    text-decoration: underline;
+}
+
+/* Error and Info Messages */
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.success-message {
+    color: green;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.info-message {
+    font-size: 12px;
+    color: rgb(44, 36, 36);
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-message i {
+    color: yellow;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+/* Password Visibility Toggle */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center; /* Ensures vertical alignment of content inside */
+    width: 90%;
+    max-width: 300px;
+    padding-left: 15px;
+}
+
+.password-container input {
+    flex-grow: 1;
+    padding-right: 30px; /* Adjust space to match toggle button */
+}
+
+.password-container .toggle-password {
+    color: var(--light-blue);
+    position: absolute;
+    right: 10px;
+    width: 17px;  /* Match your icon size */
+    height: 17px; /* Match your icon size */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 17px; /* Ensures the icon size remains the same */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Remove default padding */
+}
+
+.password-container .toggle-password:hover {
+    color: var(--blue);
+}
+
+.modal-content form input[type="email"],
+.modal-content form input[type="text"],
+.modal-content form input[type="password"],
+.modal-content form button {
+    width: 80%;
+    margin: 10px auto;
+    padding: 10px;
+}
+
+.modal-content form button {
+    background-color: var(--light-blue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#otp {
+    margin-top: 10px;
+}
+
+#resendOtpButton {
+    display: block;
+    margin: 10px auto;
+}
+
+#continueButton, #confirmButton {
+    width: 50%;
+    display: block;
+}
+
+#loginModal {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    margin-top: 10px;
+    border-color: #fff;
+    background-color: var(--aqua);
+}
+
+#signupModal {
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    margin-top: 10px;
+    border-color: #fff;
+    background-color: var(--aqua);
+}

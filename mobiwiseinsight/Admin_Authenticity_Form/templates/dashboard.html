@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <title>MobiWise Insight</title>
+    <link rel="stylesheet" href="static/admin.css">
+</head>
+<body>
+    <img id="logo" src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+    <div id="welcomePopup" class="welcome-popup">
+        <div class="popup-content">
+            <h2>Welcome, {{ admin_name }}!</h2>
+            <p>Role: {{ admin_role }}</p>
+            <p>Click anywhere or press any key to continue.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const popup = document.querySelector("#welcomePopup");
+
+            function handleRedirect() {
+                fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.role === "Order Manager") {
+                        window.location.href = "http://127.0.0.1:5007";
+                    }
+                    else {
+                        window.location.href = "http://127.0.0.1:5004";
+                    }
+                })
+            }
+
+            if (popup) {
+                document.addEventListener("click", handleRedirect);
+                document.addEventListener("keydown", handleRedirect);
+            } else {
+                console.error("Popup element not found!");
+            }
+        });
+    </script>
+</body>
+</html>

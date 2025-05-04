@@ -1,0 +1,27 @@
+CREATE TABLE ChatSessions (
+    SessionID NUMBER PRIMARY KEY,
+    UserID NUMBER,
+    StartTime TIMESTAMP DEFAULT SYSDATE
+);
+
+CREATE TABLE ChatMessages (
+    MessageID NUMBER PRIMARY KEY,
+    SessionID NUMBER,
+    Sender VARCHAR2(10),  -- 'user' or 'bot'
+    MessageText CLOB,
+    Timestamp TIMESTAMP DEFAULT SYSDATE,
+    FOREIGN KEY (SessionID) REFERENCES ChatSessions(SessionID)
+);
+
+CREATE SEQUENCE chat_sessions_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+CREATE SEQUENCE chat_messages_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+

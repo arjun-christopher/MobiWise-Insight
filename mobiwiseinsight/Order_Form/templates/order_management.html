@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <title>MobiWise Insight</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='order_styles.css') }}">
+    <style>
+        body {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            text-decoration: none;
+            color: #00b4d8;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            color: #0077b6;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        select {
+            padding: 8px;
+            width: 60%;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href='http://127.0.0.1:5003/' class="back-button">←</a>
+    <img id="logo" src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+    <br>
+
+    <!-- Role-Based Form Selection Dropdown -->
+    <div id="form-selector-container" class="form-group" style="display: none; margin-right: 3%;">
+        <label for="form-selector">Select Form</label>
+        <select id="form-selector" onchange="redirectToForm()">
+            <option value="mobile">Mobile Form</option>
+            <option value="offer">Mobile Discount Form</option>
+            <option value="admin">Admin Form</option>
+            <option value="order" selected>Order Management Form</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <h1>Order Management Form</h1>
+
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="OrderID">Order ID</label>
+                <input type="text" id="OrderID" name="OrderID" required>
+            </div>
+
+            <div class="form-group">
+                <label for="UserID">User ID</label>
+                <input type="text" id="UserID" name="UserID" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="AddressID">Address ID</label>
+                <input type="text" id="AddressID" name="AddressID" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="MobileID">Mobile ID</label>
+                <input type="text" id="MobileID" name="MobileID" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="OrderDate">Order Date</label>
+                <input type="text" id="OrderDate" name="OrderDate" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="ExpectedDelivery">Expected Delivery</label>
+                <input type="text" id="ExpectedDelivery" name="ExpectedDelivery" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="PaymentMethod">Payment Method</label>
+                <input type="text" id="PaymentMethod" name="PaymentMethod" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="OrderStatus">Order Status</label>
+                <select id="OrderStatus" name="OrderStatus">
+                    <option value="" disabled selected>Select Order Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="DeliveryStage">Delivery Stage</label>
+                <select id="DeliveryStage" name="DeliveryStage">
+                    <option value="" disabled selected>Select Delivery Stage</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Dispatched">Dispatched</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+
+            <div class="button-line">
+                <button type="button" onclick="fetchPreviousOrder()">← Previous</button>
+                <button type="button" onclick="fetchOrder()">Fetch</button>
+                <button type="button" onclick="updateOrder()">Update</button>
+                <button type="button" onclick="fetchNextOrder()">Next →</button>
+            </div>
+        </form>
+
+        <!-- Modals (Error/Success) -->
+        <div id="messageModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeMessage()">&times;</span>
+                <p id="messageText"></p>
+            </div>
+        </div>
+
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeError()">&times;</span>
+                <div id="error-popup"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function redirectToForm() {
+            const selectedForm = document.getElementById("form-selector").value;
+
+            if (selectedForm === "mobile") {
+                window.location.href = "http://127.0.0.1:5004/";  // Redirect to the Mobile Form
+            } else if (selectedForm === "offer") {
+                window.location.href = "http://127.0.0.1:5006/";  // Redirect to the Discount Offer Form
+            } else if (selectedForm === "admin") {
+                window.location.href = "http://127.0.0.1:5005/";  // Redirect to Admin Form
+            } else if (selectedForm === "order") {
+                window.location.href = "http://127.0.0.1:5007/";  // Redirect to Admin Form
+            }
+        }
+
+        // Ensure Mobile Form is first & show dropdown based on role
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.role === "Super Admin" || data.role === "Product Manager") {
+                        document.getElementById("form-selector-container").style.display = "block"; // Show dropdown
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    const commitButton = document.querySelector("button[onclick='commitMobile()']");
+                    const offerOption = document.querySelector("#form-selector option[value='offer']");
+                    const adminOption = document.querySelector("#form-selector option[value='admin']");
+                    const orderOption = document.querySelector("#form-selector option[value='order']");
+                    if (data.role === "Data Entry Operator") {
+                        commitButton.disabled = true;
+                        offerOption.disabled = true;
+                        offerOption.style.display = 'none';
+                    }
+                    if (data.role === "Product Manager") {
+                        adminOption.disabled = true;
+                        adminOption.style.display = 'none';
+                        orderOption.disabled = true;
+                        orderOption.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('errorModal')) {
+                closeError();
+            }
+        }
+        
+        function showMessages(messageContent) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.innerHTML = messageContent; // Display multiple messages
+            modal.style.display = 'flex';
+        }
+
+        function showError(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'red';  // Set error message color to red
+            modal.style.display = 'flex';
+        }
+
+        function showSuccess(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'green';  // Set success message color to green
+            modal.style.display = 'flex';
+        }
+
+        function closeError() {
+            const modal = document.getElementById('errorModal');
+            modal.style.display = 'none';
+        }
+
+        function fetchOrder() {
+            const orderId = document.getElementById('OrderID').value;
+
+            if (!orderId) {
+                showError("Please enter an Order ID.");
+                return;
+            }
+
+            fetch('/fetch_order_record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Fetched order data:", data);
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        closeError();
+
+                        // Format dates to 'YYYY-MM-DD' style (if needed)
+                        const orderDate = data.ORDERDATE ? new Date(data.ORDERDATE).toISOString().split('T')[0] : '';
+                        const expectedDelivery = data.EXPECTEDDELIVERY ? new Date(data.EXPECTEDDELIVERY).toISOString().split('T')[0] : '';
+
+                        // Populate form fields
+                        document.getElementById('UserID').value = data.USERID || '';
+                        document.getElementById('AddressID').value = data.ADDRESSID || '';
+                        document.getElementById('MobileID').value = data.MOBILEID || '';
+                        document.getElementById('OrderDate').value = orderDate;
+                        document.getElementById('ExpectedDelivery').value = expectedDelivery;
+                        document.getElementById('PaymentMethod').value = data.PAYMENTMETHOD || '';
+                        document.getElementById('OrderStatus').value = data.ORDERSTATUS || 'Active';
+                        document.getElementById('DeliveryStage').value = data.DELIVERYSTAGE || 'Pending';
+                    }
+                })
+                .catch(error => {
+                    showError("An unexpected error occurred. Please try again later.");
+                    console.error(error);
+                });
+        }
+
+
+        function fetchPreviousOrder() {
+            const orderId = document.getElementById('OrderID').value;
+
+            if (!orderId) {
+                showError("Please enter the current Order ID.");
+                return;
+            }
+
+            fetch('/fetch_previous_order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Format dates
+                    const orderDate = data.ORDERDATE ? new Date(data.ORDERDATE).toISOString().split('T')[0] : '';
+                    const expectedDelivery = data.EXPECTEDDELIVERY ? new Date(data.EXPECTEDDELIVERY).toISOString().split('T')[0] : '';
+
+                    // Populate form fields with the previous order data
+                    document.getElementById('OrderID').value = data.ORDERID || '';
+                    document.getElementById('UserID').value = data.USERID || '';
+                    document.getElementById('AddressID').value = data.ADDRESSID || '';
+                    document.getElementById('MobileID').value = data.MOBILEID || '';
+                    document.getElementById('OrderDate').value = orderDate;
+                    document.getElementById('ExpectedDelivery').value = expectedDelivery;
+                    document.getElementById('PaymentMethod').value = data.PAYMENTMETHOD || '';
+                    document.getElementById('OrderStatus').value = data.ORDERSTATUS || 'Active';
+                    document.getElementById('DeliveryStage').value = data.DELIVERYSTAGE || 'Pending';
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function fetchNextOrder() {
+            const orderId = document.getElementById('OrderID').value;
+
+            if (!orderId) {
+                showError("Please enter the current Order ID.");
+                return;
+            }
+
+            fetch('/fetch_next_order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Format dates
+                    const orderDate = data.ORDERDATE ? new Date(data.ORDERDATE).toISOString().split('T')[0] : '';
+                    const expectedDelivery = data.EXPECTEDDELIVERY ? new Date(data.EXPECTEDDELIVERY).toISOString().split('T')[0] : '';
+
+                    // Populate form fields with the next order data
+                    document.getElementById('OrderID').value = data.ORDERID || '';
+                    document.getElementById('UserID').value = data.USERID || '';
+                    document.getElementById('AddressID').value = data.ADDRESSID || '';
+                    document.getElementById('MobileID').value = data.MOBILEID || '';
+                    document.getElementById('OrderDate').value = orderDate;
+                    document.getElementById('ExpectedDelivery').value = expectedDelivery;
+                    document.getElementById('PaymentMethod').value = data.PAYMENTMETHOD || '';
+                    document.getElementById('OrderStatus').value = data.ORDERSTATUS || 'Active';
+                    document.getElementById('DeliveryStage').value = data.DELIVERYSTAGE || 'Pending';
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function updateOrder() {
+            const orderData = {
+                order_id: document.getElementById('OrderID').value,
+                order_status: document.getElementById('OrderStatus').value,
+                delivery_stage: document.getElementById('DeliveryStage').value,
+            };
+
+            // Validate Order ID
+            if (!orderData.order_id) {
+                showError("Order ID is required to update a record.");
+                return;
+            }
+
+            fetch('/update_order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(data.success);
+                }
+            })
+            .catch(() => showError("An unexpected error occurred."));
+        }
+
+    </script>
+</body>
+
+</html>

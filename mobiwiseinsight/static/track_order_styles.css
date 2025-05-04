@@ -1,0 +1,198 @@
+/* Color Palette */
+:root {
+    --dark-blue: #03045e;
+    --blue: #0077b6;
+    --light-blue: #00b4d8;
+    --soft-blue: #90e0ef;
+    --aqua: #caf0f8;
+}
+
+.track-order-container {
+    padding: 40px;
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+}
+
+.no-orders {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.no-orders img {
+    width: 180px;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.progress-container {
+    position: relative;
+    margin-top: 20px;
+}
+
+.progress-bar {
+    position: relative;
+    height: 12px;
+    background-color: #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.stages {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: var(--dark-blue);
+}
+
+.expected-date {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.order-card {
+    margin: 30px 0;
+    background: var(--aqua);
+    border-radius: 10px;
+    padding: 22px 28px 28px 28px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 530px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.order-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.order-mobile-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.07);
+}
+
+.progress-container {
+    position: relative;
+    margin-top: 12px;
+    padding-bottom: 20px;
+}
+
+.progress-bar,
+.progress {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #ddd;
+}
+
+.progress {
+    background-color: var(--blue);
+    transition: width 0.5s ease;
+}
+
+.van-icon {
+    position: absolute;
+    top: -30px;
+    font-size: 25px;
+    color: #00b4d8;
+    transition: left 0.5s ease-in-out;
+}
+
+.stages {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: var(--dark-blue);
+}
+
+.history-button-container button {
+    padding: 10px 20px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.history-button-container button:hover {
+    background: var(--dark-blue);
+}
+
+.cart-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    padding: 18px 25px;
+    border: 2px solid #0077b6;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    color: #333;
+    text-align: center;
+    width: 350px;
+    max-height: 1000px;
+    /* Adjust to your desired height */
+    overflow-y: auto;
+}
+
+.cart-popup .close-btn {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+    color: #0077b6;
+}
+
+.cart-popup p {
+    font-size: 1em;
+    margin-bottom: 10px;
+    color: var(--blue);
+}
+
+/* Confirm and Cancel buttons */
+.cart-popup button {
+    padding: 12px 20px;
+    font-size: 16px;
+    margin-right: 10px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: 0.3s;
+    font-weight: bold;
+    background: var(--light-blue);
+}
+
+.cart-popup button:hover {
+    background: var(--blue);
+}
+
+.cancel-order-btn {
+    padding: 10px 15px;
+    background: var(--light-blue);
+    /* Red color for removal */
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-order-btn:hover {
+    background: var(--blue);
+}

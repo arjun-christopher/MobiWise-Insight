@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobiWise Insight</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='compare_styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home_styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<script>
+    function toggleProfileMenu() {
+        const dropdown = document.getElementById("profile-dropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    // Optional: Hide dropdown if clicked outside
+    window.addEventListener("click", function (e) {
+        const profile = document.querySelector(".profile-icon");
+        const dropdown = document.getElementById("profile-dropdown");
+        if (!profile.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+    function logout() {
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.reload(); // Refresh to update header
+    }
+</script>
+<body>
+    <header>
+        <a href="{{ url_for('homepage') }}">
+            <img src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+        </a>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search Mobiles"
+                onclick="window.location.href='/all-mobiles'">
+            <button id="search-btn">🔍</button>
+        </div>
+        <div id="cart-container">
+            <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
+        </div>
+    </header>
+
+    <div class="profile-dropdown-wrapper">
+        {% if user %}
+        <div class="user-profile">
+            <div class="profile-icon" onclick="toggleProfileMenu()">{{ user.username[0] | upper }}</div>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <p>Username: <strong>{{ user.username }}</strong></p>
+                <p>Email: <strong>{{ user.email }}</strong></p>
+                <br>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        {% else %}
+        <a href="http://127.0.0.1:5002/" class="login-text"
+            style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
+        {% endif %}
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('homepage') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="{{ url_for('all_mobiles') }}"
+                    class="{% if request.path.startswith('/all-mobiles') or request.path.startswith('/mobile-details/') %}active{% endif %}">Mobiles</a>
+            </li>
+            <li><a href="{{ url_for('compare_mobiles_page') }}"
+                    class="{% if request.path == '/compare-mobiles' or request.path.startswith('/shared-compare') %}active{% endif %}">Compare Mobiles</a></li>
+            <li><a href="{{ url_for('order_details') }}"
+                    class="{% if request.path == '/order-details' or request.path == '/order-history' %}active{% endif %}">Orders</a></li>
+            <li><a href="{{ url_for('latest_news') }}"
+                    class="{% if request.path == '/latest-news' %}active{% endif %}">Latest News</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1 style="text-align: center;">Shared Comparison View</h1>
+
+        <div id="specs_head" style="display:none;">
+            <h2>Mobile Specifications</h2>
+        </div>
+        <table id="comparison-table" class="comparison-table"></table>
+
+        <br>
+        <div id="outcome_head" style="display:none;">
+            <h2>Comparison Outcome</h2>
+        </div>
+        <table id="comparison-outcome" class="comparison-outcome"></table>
+
+        <br>
+        <div id="suggestion-result"></div>
+    </main>
+
+    <footer>
+        <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
+    </footer>
+
+    <!-- Embed JSON safely -->
+    <script id="shared-mobile-ids" type="application/json">
+        {{ mobile_ids | tojson | safe }}
+    </script>
+    
+    <script id="shared-preferences" type="application/json">
+        {{ preferences | tojson | safe }}
+    </script>
+
+
+    <script>
+        // Read and parse JSON data
+        const mobile_ids = JSON.parse(document.getElementById("shared-mobile-ids").textContent);
+        const preferences = JSON.parse(document.getElementById("shared-preferences").textContent);
+
+        const sharedData = {
+            mobile_ids: mobile_ids,
+            preferences: preferences
+        };
+
+        async function fetchSharedComparison() {
+            try {
+                const response = await fetch("/compare-mobiles", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        mobile_ids: sharedData.mobile_ids,
+                        preferences: sharedData.preferences
+                    })
+                });
+
+                const data = await response.json();
+
+                const mobileData = data.mobiles || [];
+                const comparisons = data.comparisons || [];
+                const suggestion = data.best_suggestion || {};
+
+                const specsTable = document.getElementById("comparison-table");
+                const outcomeTable = document.getElementById("comparison-outcome");
+                const suggestionResult = document.getElementById("suggestion-result");
+
+                // Clear and show sections
+                specsTable.innerHTML = "";
+                outcomeTable.innerHTML = "";
+                suggestionResult.innerHTML = "";
+                document.getElementById("specs_head").style.display = "block";
+                document.getElementById("outcome_head").style.display = "block";
+
+                // Create Specs Header Row
+                let header = "<tr><th>Specification</th>";
+                mobileData.forEach(m => {
+                    header += `<th>${m.Model}</th>`;
+                });
+                header += "</tr>";
+                specsTable.innerHTML += header;
+
+                const specMap = {
+                    "Price": "Price",
+                    "RAM": "RAM",
+                    "Storage": "Storage",
+                    "Battery": "Battery",
+                    "Display": "Display",
+                    "Processor": "Processor",
+                    "Front Camera": "FrontCamera",
+                    "Rear Camera": "RearCamera",
+                    "User Rating": "UserRating"
+                };
+
+                for (const [label, key] of Object.entries(specMap)) {
+                    let row = `<tr><td>${label}</td>`;
+                    mobileData.forEach(m => {
+                        const val = key === "Price" ? "₹ " + m[key] : m[key];
+                        row += `<td>${val}</td>`;
+                    });
+                    row += "</tr>";
+                    specsTable.innerHTML += row;
+                }
+
+                // Best Outcome Comparison
+                outcomeTable.innerHTML = "<tr><th>Feature</th><th>Best Mobile</th><th>Best Value</th></tr>";
+                comparisons.forEach(c => {
+                    outcomeTable.innerHTML += `
+                        <tr>
+                            <td>${c.feature}</td>
+                            <td class="best-spec">${c.best_model}</td>
+                            <td>${c.feature === "Price" ? "" + c.best_value : c.best_value}</td>
+                        </tr>`;
+                });
+
+                // Best Recommendation
+                if (suggestion && suggestion.model !== "N/A") {
+                    suggestionResult.innerHTML = `
+                        <h2>Best Recommended Mobile</h2>
+                        <div class="best-mobile">
+                            <div class="best-mobile-info">
+                                <p><strong>Model:</strong> ${suggestion.model}</p>
+                                <p><strong>Brand:</strong> ${suggestion.brand}</p>
+                                <p><strong>Price:</strong> ${suggestion.price}</p>
+                                <p><strong>Why Recommended:</strong> ${suggestion.reason}</p>
+                            </div>
+                        </div>`;
+                }
+            } catch (err) {
+                console.error("Error fetching comparison:", err);
+                alert("Something went wrong while fetching shared comparison.");
+            }
+        }
+
+        fetchSharedComparison();
+    </script>
+</body>
+
+</html>

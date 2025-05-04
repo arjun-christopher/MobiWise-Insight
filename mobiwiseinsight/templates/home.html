@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <!-- Include Font Awesome for cart icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <title>MobiWise Insight</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home_styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ======= MOBILE CAROUSEL =======
+        const items = document.querySelectorAll(".carousel-item");
+        const totalItems = items.length;
+        let index = 0;
+        let interval;
+
+        function showSlide(i) {
+            items.forEach(item => item.style.display = "none");
+            items[i].style.display = "flex"; // for flex layout
+        }
+
+        function nextSlide() {
+            index = (index + 1) % totalItems;
+            showSlide(index);
+        }
+
+        function prevSlide() {
+            index = (index - 1 + totalItems) % totalItems;
+            showSlide(index);
+        }
+
+        document.getElementById("nextBtn").addEventListener("click", nextSlide);
+        document.getElementById("prevBtn").addEventListener("click", prevSlide);
+
+        function startAutoSlide() {
+            interval = setInterval(nextSlide, 6000); // Faster slide: every 6 seconds
+        }
+
+        function stopAutoSlide() {
+            clearInterval(interval);
+        }
+
+        document.querySelector(".carousel-container").addEventListener("mouseenter", stopAutoSlide);
+        document.querySelector(".carousel-container").addEventListener("mouseleave", startAutoSlide);
+
+        showSlide(index);
+        startAutoSlide();
+
+        // ======= DISCOUNT CAROUSEL =======
+        const discountItems = document.querySelectorAll(".discount-slide");
+        const totalDiscountItems = discountItems.length;
+        let discountIndex = 0;
+        let discountInterval;
+
+        function showDiscountSlide(i) {
+            discountItems.forEach(item => item.style.display = "none");
+            discountItems[i].style.display = "block";
+        }
+
+        function nextDiscountSlide() {
+            discountIndex = (discountIndex + 1) % totalDiscountItems;
+            showDiscountSlide(discountIndex);
+        }
+
+        function prevDiscountSlide() {
+            discountIndex = (discountIndex - 1 + totalDiscountItems) % totalDiscountItems;
+            showDiscountSlide(discountIndex);
+        }
+
+        document.querySelector(".discount-next").addEventListener("click", nextDiscountSlide);
+        document.querySelector(".discount-prev").addEventListener("click", prevDiscountSlide);
+
+        function startAutoDiscountSlide() {
+            discountInterval = setInterval(nextDiscountSlide, 6000);
+        }
+
+        function stopAutoDiscountSlide() {
+            clearInterval(discountInterval);
+        }
+
+        document.querySelector(".discount-slider").addEventListener("mouseenter", stopAutoDiscountSlide);
+        document.querySelector(".discount-slider").addEventListener("mouseleave", startAutoDiscountSlide);
+
+        showDiscountSlide(discountIndex);
+        startAutoDiscountSlide();
+    });
+
+    function toggleProfileMenu() {
+        const dropdown = document.getElementById("profile-dropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+
+    // Optional: Hide dropdown if clicked outside
+    window.addEventListener("click", function (e) {
+        const profile = document.querySelector(".profile-icon");
+        const dropdown = document.getElementById("profile-dropdown");
+        if (!profile.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
+    function logout() {
+        document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.reload(); // Refresh to update header
+    }
+</script>
+    
+<body>
+    <header>
+        <a href="http://127.0.0.1:5001/">
+            <img src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+        </a>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search Mobiles" onclick="redirectToAllMobiles()">
+            <button id="search-btn">🔍</button>
+        </div>
+        <!-- Cart Icon (Font Awesome) -->
+        <div id="cart-container">
+            <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
+        </div>
+    </header>
+
+    <div class="profile-dropdown-wrapper">
+        {% if user %}
+        <div class="user-profile">
+            <div class="profile-icon" onclick="toggleProfileMenu()">{{ user.username[0] | upper }}</div>
+            <div id="profile-dropdown" class="profile-dropdown">
+                <p>Username: <strong>{{ user.username }}</strong></p>
+                <p>Email: <strong>{{ user.email }}</strong></p>
+                <br>
+                <a href="/logout">Logout</a>
+            </div>
+        </div>
+        {% else %}
+        <a href="http://127.0.0.1:5002/" class="login-text" style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
+        {% endif %}
+    </div>
+
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('homepage') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+            <li><a href="{{ url_for('all_mobiles') }}" class="{% if request.path.startswith('/all-mobiles') or request.path.startswith('/mobile-details/') %}active{% endif %}">Mobiles</a></li>
+            <li><a href="{{ url_for('compare_mobiles_page') }}" class="{% if request.path == '/compare-mobiles' %}active{% endif %}">Compare Mobiles</a></li>
+            <li><a href="{{ url_for('order_details') }}"
+                    class="{% if request.path == '/order-details' or request.path == '/order-history' %}active{% endif %}">Orders</a></li>
+            <li><a href="{{ url_for('latest_news') }}" class="{% if request.path == '/latest-news' %}active{% endif %}">Latest News</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section class="discount-carousel-wrapper">
+            <!-- Discounted Mobiles -->
+            <div class="discount-carousel">
+                <h2>Discount Offers</h2>
+                
+                <div class="discount-slider">
+                    <button class="discount-prev">❮</button>
+                    <div class="discount-track">
+                        {% for mob in discounted_mobiles %}
+                        <div class="discount-slide">
+                            <a href="/mobile-details/{{ mob.id }}">
+                                <img src="{{ mob.image_path }}" alt="{{ mob.model }}">
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="discount-next">❯</button>
+                </div>
+            </div>
+
+            <div class="mobile-carousel">
+                <h2>Recommended Mobiles</h2>
+                <div class="carousel-container">
+                    <button id="prevBtn">❮</button>
+                    <div class="carousel">
+                        {% for mobile in mobiles %}
+                        <div class="carousel-item">
+                            <img src="{{ mobile.image }}" alt="Mobile Image">
+                            <h3>{{ mobile.model }}</h3>
+                            <p style="color: rgb(6, 165, 165);"><strong>₹{{ mobile.price }}</strong></p>
+                            <a href="/mobile-details/{{ mobile.id }}" class="view-details">View Details</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button id="nextBtn">❯</button>
+                </div>
+            
+                <!-- View More Button -->
+                <div class="view-more">
+                    <a href="/all-mobiles">View More</a>
+                </div>
+                <br>
+                <br>
+
+            </div>
+        </section>
+        <section class="latest-news-home">
+            <h1>Latest Mobile News</h1>
+            <div class="news-container-home">
+                <!-- Left Column (1 News Article) -->
+                <div class="news-column news-column-left">
+                    <div class="news-card">
+                        <img src="{{ news[0].image }}" alt="News Image">
+                        <h3>{{ news[0].title }}</h3>
+                        <p class="news-date">Published: {{ news[0].publishedAt }}</p>
+                        <p>{{ news[0].description }}</p>
+                        <center><a href="{{ news[0].url }}" target="_blank">Read More</a></center>
+                    </div>
+                </div>
+        
+                <!-- Right Column (2 News Articles) -->
+                <div class="news-column news-column-right">
+                    {% for article in news[1:] %}
+                    <div class="news-card">
+                        <img src="{{ article.image }}" alt="News Image">
+                        <h3>{{ article.title }}</h3>
+                        <p class="news-date">Published: {{ article.publishedAt }}</p>
+                        <p>{{ article.description }}</p>
+                        <center><a href="{{ article.url }}" target="_blank">Read More</a></center>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        
+            <!-- View More Button -->
+            <div class="view-more">
+                <a href="{{ url_for('latest_news') }}">View More</a>
+            </div>
+        </section>
+
+        <img src="{{ url_for('static', filename='Bot Icon - MobiWise Insight.png') }}" id="chatbot-button" onclick="toggleChatbot()" alt="Chatbot">
+        <!-- Chatbot Modal -->
+        <div id="chatbot-modal" style="display: none;">
+            <div id="chatbot-header">MobiWise Chat Bot</div>
+            <div id="chatbot-body"></div>
+            <div id="chatbot-input-container">
+                <input type="text" id="chatbot-input" placeholder="Ask something..."
+                    onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Dino Button -->
+        <img src="{{ url_for('static', filename='Dino.png') }}" id="dino-button" onclick="toggleDinoGame()"
+            alt="Dino Game">
+        
+        <!-- Dino Modal -->
+        <div id="dino-modal" class="dino-modal">
+            <div class="dino-modal-content">
+                <div class="dino-modal-header">
+                    <h2 id="dino-header">Play Dino Runner</h2>
+                </div>
+                <iframe src="/dino-game/index.html" frameborder="0"></iframe>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='search_mobiles.js') }}"></script>
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+    <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
+    <script src="{{ url_for('static', filename='dino.js') }}"></script>
+
+</body>
+</html>

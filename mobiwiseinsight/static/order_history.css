@@ -1,0 +1,29 @@
+.order-history-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.order-history-img {
+    width: 100px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.order-history-info h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.no-orders {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.no-orders-img {
+    width: 150px;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}

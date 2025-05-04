@@ -1,0 +1,151 @@
+:root {
+    --dark-blue: #03045e;
+    --blue: #0077b6;
+    --light-blue: #00b4d8;
+    --soft-blue: #90e0ef;
+    --aqua: #caf0f8;
+}
+
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2c3e50;
+    background: #f8f9fa;
+    margin: 0;
+    text-align: center;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1 {
+    color: var(--blue);
+    font-size: 2.5em;
+    margin-top: 20px;
+}
+
+h2, h3 {
+    color: var(--light-blue);
+    text-align: center;
+    margin: 10px 0;
+}
+
+.container {
+    background-color: var(--aqua);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+}
+
+#logo{
+    width: 38%;
+    height: auto;
+} 
+
+/* Buttons */
+.button {
+    padding: 10px 20px;
+    margin: 10px 5px;
+    font-size: 16px;
+    background-color: var(--soft-blue);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.button:hover {
+    background-color: var(--blue);
+}
+
+/* Form Fields */
+/* Form Fields */
+input[type="text"], input[type="password"], input[type="submit"] {
+    width: 90%;
+    max-width: 300px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--light-blue);
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+input[type="submit"] {
+    background-color: var(--light-blue);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: var(--blue);
+}
+
+input[type="email"] {
+    width: 70%;
+    max-width: 300px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--light-blue);
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Password Visibility Toggle */
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center; /* Ensures vertical alignment of content inside */
+    width: 90%;
+    max-width: 300px;
+    padding-left: 50px;
+}
+
+.password-container input {
+    flex-grow: 1;
+    padding-right: 30px; /* Adjust space to match toggle button */
+}
+
+.password-container .toggle-password {
+    color: var(--light-blue);
+    position: absolute;
+    margin-top:8px;
+    right: 10px;
+    width: 17px;  /* Match your icon size */
+    height: 17px; /* Match your icon size */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 17px; /* Ensures the icon size remains the same */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* Remove default padding */
+}
+
+.password-container .toggle-password:hover {
+    color: var(--blue);
+}
+
+/* Error and Info Messages */
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.success-message {
+    color: green;
+    font-size: 14px;
+    margin-top: 10px;
+}

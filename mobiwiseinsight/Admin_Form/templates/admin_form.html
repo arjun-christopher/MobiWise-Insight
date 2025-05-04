@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <link rel="stylesheet" href="static/admin_form_styles.css">
+    <title>MobiWise Insight</title>
+    <style>
+        body {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            text-decoration: none;
+            color: #00b4d8;
+            font-weight: bold;
+        }
+
+        .back-button:hover {
+            color: #0077b6;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        form {
+            margin-top: 35px;
+        }
+
+        input[type="date"] {
+            width: 60%; /* Matches other input fields */
+            padding: 9px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            font-size: 16px;
+            appearance: none; /* Removes default browser styling */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            position: relative; /* Allows positioning of the calendar icon */
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns%3D%27http://www.w3.org/2000/svg%27 fill%3D%27%23f0f0f0%27 height%3D%2724%27 viewBox%3D%270 96 960 960%27 width%3D%2724%27%3E%3Cpath d%3D%27M180 976q-24 0-42-18t-18-42V366q0-24 18-42t42-18h60v-80q0-17 11.5-28.5T280 186q17 0 28.5 11.5T320 226v80h320v-80q0-17 11.5-28.5T680 186q17 0 28.5 11.5T720 226v80h60q24 0 42 18t18 42v550q0 24-18 42t-42 18H180Zm0-60h600V526H180v390Zm0-450h600V366h-60v40q0 17-11.5 28.5T680 446q-17 0-28.5-11.5T640 406v-40H320v40q0 17-11.5 28.5T280 446q-17 0-28.5-11.5T240 406v-40h-60v100Zm0 450V526v390Zm150-230q25 0 42.5-17.5T390 626q0-25-17.5-42.5T330 566q-25 0-42.5 17.5T270 626q0 25 17.5 42.5T330 686Zm300 0q25 0 42.5-17.5T690 626q0-25-17.5-42.5T630 566q-25 0-42.5 17.5T570 626q0 25 17.5 42.5T630 686Zm-300 150q25 0 42.5-17.5T390 776q0-25-17.5-42.5T330 716q-25 0-42.5 17.5T270 776q0 25 17.5 42.5T330 836Zm300 0q25 0 42.5-17.5T690 776q0-25-17.5-42.5T630 716q-25 0-42.5 17.5T570 776q0 25 17.5 42.5T630 836Z%27/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #90e0ef;
+        }
+
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        #error-popup {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        function clearFields() {
+            document.querySelectorAll('input[type="text"]:not(#AdminID), input[type="password"], input[type="email"], input[type="number"], input[type="date"]').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+        }
+
+        async function insertAdmin() {
+            // Enable all fields for admin input
+            const fields = document.querySelectorAll("#AdminForm input, #AdminForm select");
+            fields.forEach(field => {
+                field.disabled = false;
+            });
+
+            try {
+                // Fetch the next available AdminID from the backend
+                const response = await fetch('/get_next_admin_id', { 
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("AdminID").value = data.next_id; // Set the AdminID field
+                } else {
+                    console.error('Failed to fetch the next AdminID:', response.status, response.statusText);
+                }
+
+                document.getElementById("AdminID").focus(); // Focus on the AdminID field
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function fetchAdmin() {
+            const adminId = document.getElementById('AdminID').value;
+
+            if (!adminId) {
+                showError("Please enter an Admin ID.");
+                return;
+            }
+
+            fetch('/fetch_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: adminId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError(); // Close any open error popups
+
+                    // Populate form fields with the data
+                    document.getElementById('Name').value = data.NAME || '';
+                    document.getElementById('Password').value = data.PASSWORD || '';
+                    document.getElementById('Email').value = data.EMAIL || '';
+                    document.getElementById('Phone').value = data.PHONE || '';
+                    document.getElementById('Role').value = data.ROLE || '';
+                    document.getElementById('Status').value = data.STATUS || '';
+
+                    if (data.CREATEDAT) {
+                        const createdAt = new Date(data.CREATEDAT);
+                        document.getElementById('CreatedAt').value = createdAt.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+
+                    if (data.LASTLOGIN) {
+                        const lastLogin = new Date(data.LASTLOGIN);
+                        document.getElementById('LastLogin').value = lastLogin.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+
+        function fetchNextAdmin() {
+            const adminId = document.getElementById('AdminID').value;
+
+            if (!adminId) {
+                showError("Please enter the current Admin ID.");
+                return;
+            }
+
+            fetch('/fetch_next_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: adminId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Populate form fields with the next admin record data
+                    document.getElementById('AdminID').value = data.ADMINID || '';
+                    document.getElementById('Name').value = data.NAME || '';
+                    document.getElementById('Password').value = data.PASSWORD || '';
+                    document.getElementById('Email').value = data.EMAIL || '';
+                    document.getElementById('Phone').value = data.PHONE || '';
+                    document.getElementById('Role').value = data.ROLE || '';
+                    document.getElementById('Status').value = data.STATUS || '';
+
+                    if (data.CREATEDAT) {
+                        const createdAt = new Date(data.CREATEDAT);
+                        document.getElementById('CreatedAt').value = createdAt.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+
+                    if (data.LASTLOGIN) {
+                        const lastLogin = new Date(data.LASTLOGIN);
+                        document.getElementById('LastLogin').value = lastLogin.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function fetchPreviousAdmin() {
+            const adminId = document.getElementById('AdminID').value;
+
+            if (!adminId) {
+                showError("Please enter the current Admin ID.");
+                return;
+            }
+
+            fetch('/fetch_previous_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: adminId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    closeError();
+
+                    // Populate form fields with the previous admin record data
+                    document.getElementById('AdminID').value = data.ADMINID || '';
+                    document.getElementById('Name').value = data.NAME || '';
+                    document.getElementById('Password').value = data.PASSWORD || '';
+                    document.getElementById('Email').value = data.EMAIL || '';
+                    document.getElementById('Phone').value = data.PHONE || '';
+                    document.getElementById('Role').value = data.ROLE || '';
+                    document.getElementById('Status').value = data.STATUS || '';
+
+                    if (data.CREATEDAT) {
+                        const createdAt = new Date(data.CREATEDAT);
+                        document.getElementById('CreatedAt').value = createdAt.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+
+                    if (data.LASTLOGIN) {
+                        const lastLogin = new Date(data.LASTLOGIN);
+                        document.getElementById('LastLogin').value = lastLogin.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+                    }
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function saveAdmin() {
+            // Gather form data
+            const adminData = {
+                admin_id: document.getElementById('AdminID').value,
+                name: document.getElementById('Name').value,
+                password: document.getElementById('Password').value,
+                email: document.getElementById('Email').value,
+                phone: document.getElementById('Phone').value,
+                role: document.getElementById('Role').value,
+                status: document.getElementById('Status').value,
+                created_at: document.getElementById('CreatedAt').value,
+                last_login: document.getElementById('LastLogin').value
+            };
+
+            // Validate required fields
+            if (!adminData.admin_id || !adminData.name || !adminData.password || !adminData.email || 
+                !adminData.phone || !adminData.role || !adminData.status) {
+                showError("All fields are required, except Created At and Last Login.");
+                return;
+            }
+
+            // Send data to backend
+            fetch('/save_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adminData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(data.success);
+                    clearFields(); // Clear fields after successful save
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function updateAdmin() {
+            const adminData = {
+                admin_id: document.getElementById('AdminID').value,
+                name: document.getElementById('Name').value,
+                password: document.getElementById('Password').value,
+                email: document.getElementById('Email').value,
+                phone: document.getElementById('Phone').value,
+                role: document.getElementById('Role').value,
+                status: document.getElementById('Status').value,
+                created_at: document.getElementById('CreatedAt').value,
+                last_login: document.getElementById('LastLogin').value
+            };
+
+            // Validate Admin ID
+            if (!adminData.admin_id) {
+                showError("Admin ID is required to update a record.");
+                return;
+            }
+
+            // Send data to backend
+            fetch('/update_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(adminData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(data.success);
+                }
+            })
+            .catch(() => showError("An unexpected error occurred."));
+        }
+
+        function deleteAdmin() {
+            const adminId = document.getElementById('AdminID').value;
+
+            if (!adminId) {
+                showError("Please enter the Admin ID to delete.");
+                return;
+            }
+
+            fetch('/delete_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ admin_id: adminId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(data.success);
+                    clearFields(); // Clear the form fields after successful deletion
+                }
+            })
+            .catch(error => {
+                showError("An unexpected error occurred. Please try again later.");
+                console.error(error);
+            });
+        }
+
+        function showMessages(messageContent) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.innerHTML = messageContent; // Display multiple messages
+            modal.style.display = 'flex';
+        }
+
+        function showError(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'red';  // Set error message color to red
+            modal.style.display = 'flex';
+        }
+
+        function showSuccess(message) {
+            const modal = document.getElementById('errorModal');
+            const errorPopup = document.getElementById('error-popup');
+            
+            errorPopup.textContent = message;
+            errorPopup.style.color = 'green';  // Set success message color to green
+            modal.style.display = 'flex';
+        }
+
+        function closeError() {
+            const modal = document.getElementById('errorModal');
+            modal.style.display = 'none';
+        }
+
+        function redirectToForm() {
+            const selectedForm = document.getElementById("form-selector").value;
+
+            if (selectedForm === "mobile") {
+                window.location.href = "http://127.0.0.1:5004/";  // Redirect to the Mobile Form
+            } else if (selectedForm === "offer") {
+                window.location.href = "http://127.0.0.1:5006/";  // Redirect to the Discount Offer Form
+            } else if (selectedForm === "admin") {
+                window.location.href = "http://127.0.0.1:5005/";  // Redirect to Admin Form
+            } else if (selectedForm === "order") {
+                window.location.href = "http://127.0.0.1:5007/";  // Redirect to Admin Form
+            }
+        }
+
+        // Ensure Mobile Form is first & show dropdown based on role
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.role === "Super Admin" || data.role === "Product Manager") {
+                        document.getElementById("form-selector-container").style.display = "block"; // Show dropdown
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/get_admin_role')
+                .then(response => response.json())
+                .then(data => {
+                    const commitButton = document.querySelector("button[onclick='commitMobile()']");
+                    const offerOption = document.querySelector("#form-selector option[value='offer']");
+                    const adminOption = document.querySelector("#form-selector option[value='admin']");
+                    const orderOption = document.querySelector("#form-selector option[value='order']");
+                    if (data.role === "Data Entry Operator") {
+                        commitButton.disabled = true;
+                        offerOption.disabled = true;
+                        offerOption.style.display = 'none';
+                    }
+                    if (data.role === "Product Manager") {
+                        adminOption.disabled = true;
+                        adminOption.style.display = 'none';
+                        orderOption.disabled = true;
+                        orderOption.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error("Error fetching role:", error));
+        });
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('errorModal')) {
+                closeError();
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Backward arrow button -->
+    <a href='http://127.0.0.1:5003/' class="back-button">←</a>
+
+    <img id="logo" src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Logo" class="app-logo">
+    <br>
+
+    <!-- Role-Based Form Selection Dropdown -->
+    <div id="form-selector-container" class="form-group" style="display: none; margin-right: 9%;">
+        <label for="form-selector">Select Form</label>
+        <select id="form-selector" onchange="redirectToForm()">
+            <option value="mobile">Mobile Form</option>
+            <option value="offer">Mobile Discount Form</option>
+            <option value="admin" selected>Admin Form</option>
+            <option value="order">Order Management Form</option>
+        </select>
+    </div>
+
+    <h1 style="margin-bottom: -20px;">Admin Form</h1>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeError()">&times;</span>
+            <div id="error-popup"></div>
+        </div>
+    </div>
+
+    <!-- Admin Form -->
+    <form id="AdminForm" name="AdminForm">
+        <div class="form-group">
+            <label for="AdminID">Admin ID</label>
+            <input type="text" id="AdminID" name="AdminID" required disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input type="text" id="Name" name="Name" required disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Password">Password</label>
+            <input type="text" id="Password" name="Password" required disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Email">Email</label>
+            <input type="email" id="Email" name="Email" required disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Phone">Phone</label>
+            <input type="text" id="Phone" name="Phone" required disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Role">Role</label>
+            <select id="Role" name="Role" required disabled>
+                <option value="" disabled selected>Select Role</option>
+                <option value="Super Admin">Super Admin</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="Data Entry Operator">Data Entry Operator</option>
+            </select>
+            <br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="Status">Status</label>
+            <select id="Status" name="Status" required disabled>
+                <option value="" disabled selected>Select Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+            <br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="CreatedAt">Created At</label>
+            <input type="date" id="CreatedAt" name="CreatedAt" disabled><br><br>
+        </div>
+
+        <div class="form-group">
+            <label for="LastLogin">Last Login</label>
+            <input type="date" id="LastLogin" name="LastLogin" disabled><br><br>
+        </div>
+
+
+
+        <!-- Buttons grouped into a single line -->
+        <div class="button-line">
+            <button type="button" onclick="fetchPreviousAdmin()">← Previous</button>
+            <button type="button" onclick="insertAdmin()">Insert</button>
+            <button type="button" onclick="fetchAdmin()">Fetch</button>
+            <button type="button" onclick="updateAdmin()">Update</button>
+            <button type="button" onclick="deleteAdmin()">Delete</button>
+            <button type="button" onclick="clearFields()">Clear</button>
+            <button type="button" onclick="saveAdmin()">Save</button>
+            <button type="button" onclick="fetchNextAdmin()">Next →</button>
+
+        </div>        
+
+    </form>
+
+</body>
+</html>

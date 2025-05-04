@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
+    <title>Invoice - Order #{{ invoice.OrderID }}</title>
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: white !important;
+            }
+    
+            .print-btn {
+                display: none !important;
+            }
+    
+            .details,
+            .summary {
+                page-break-inside: avoid;
+            }
+        }
+    
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 30px;
+            max-width: 800px;
+            margin: auto;
+            border: 2px solid #0077b6;
+            background-color: #caf0f8;
+            color: #03045e;
+        }
+    
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    
+        .header img {
+            display: block;
+            margin: 0 auto;
+            width: 300px;
+            height: auto;
+        }
+    
+        .header h2 {
+            color: #0077b6;
+            margin: 10px 0 5px;
+            font-size: 26px;
+        }
+    
+        .header p {
+            font-weight: bold;
+            font-size: 15px;
+        }
+    
+        .details,
+        .summary {
+            margin-top: 25px;
+            background-color: #ffffff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    
+        .details h3,
+        .summary h3 {
+            border-bottom: 2px solid #00b4d8;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            color: #0077b6;
+            font-size: 18px;
+        }
+    
+        .product-image {
+            display: block;
+            margin: 10px auto 20px;
+            width: 170px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.12);
+        }
+    
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 14px;
+        }
+    
+        table th {
+            background-color: #90e0ef;
+            color: #03045e;
+            padding: 8px;
+        }
+    
+        table td {
+            background-color: #f0faff;
+            padding: 8px;
+            border: 1px solid #90e0ef;
+        }
+    
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #555;
+        }
+    
+        .print-btn {
+            margin: 25px auto 0 auto;
+            display: block;
+            background-color: #0077b6;
+            color: white;
+            padding: 10px 25px;
+            font-size: 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+    
+        .print-btn:hover {
+            background-color: #03045e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='Logo - MobiWise Insight.png') }}" alt="Company Logo">
+        <div>
+            <h2>INVOICE</h2>
+            <p><strong>Order ID:</strong> #{{ invoice.OrderID }}</p>
+        </div>
+    </div>
+
+    <div class="details">
+        <h3>Customer Details</h3>
+        <p><strong>Name:</strong> {{ invoice.Username }}</p>
+        <p><strong>Email:</strong> {{ invoice.Email }}</p>
+        <p><strong>Phone:</strong> {{ invoice.Phone }}</p>
+        <p><strong>Address:</strong> {{ invoice.Address }}</p>
+    </div>
+    <br>
+    <div class="summary">
+        <h3>Order Details</h3>
+        <img src="{{ invoice.Image }}" class="product-image" alt="Product Image">
+
+        <table>
+            <tr>
+                <th>Model</th>
+                <th>Brand</th>
+                <th>Price</th>
+                <th>Order Date</th>
+                <th>Delivery Date</th>
+            </tr>
+            <tr>
+                <td>{{ invoice.Model }}</td>
+                <td>{{ invoice.Brand }}</td>
+                <td>₹ {{ invoice.Price }}</td>
+                <td>{{ invoice.OrderDate }}</td>
+                <td>{{ invoice.DeliveryDate }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for shopping with <strong>MobiWise Insight</strong>.</p>
+        <p>Invoice generated on {{ invoice.OrderDate }} | This is a computer-generated document.</p>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">Print Invoice</button>
+</body>
+
+</html>
