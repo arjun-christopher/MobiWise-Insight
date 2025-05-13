@@ -164,17 +164,17 @@
                 </div>
             </div>
             {% endfor %}
-            <div class="history-button-container">
-                <a href="{{ url_for('order_details') }}">
-                    <button>Track Order</button>
-                </a>
-            </div>
             {% else %}
             <div class="no-orders">
                 <img src="{{ url_for('static', filename='no-orders.png') }}" alt="No Orders" class="no-orders-img">
                 <h2>No Delivered Orders found!</h2>
             </div>
             {% endif %}
+            <div class="history-button-container">
+                <a href="{{ url_for('order_details') }}">
+                    <button>Track Order</button>
+                </a>
+            </div>
         </section>
     </main>
     {% endblock %}

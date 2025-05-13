@@ -195,12 +195,12 @@
                 <button class="cancel-order-btn" onclick="showCancelPopup('{{ order.Model }}','{{ order.OrderID }}')">Cancel Order</button>
             </div>
             {% endfor %}
+            {% endif %}
             <div class="history-button-container">
                 <a href="{{ url_for('order_history') }}">
                     <button>Order History</button>
                 </a>
             </div>
-            {% endif %}
             <div id="cancel-confirm-popup" class="cart-popup" style="display: none;">
                 <p id="cancel-message-text"></p>
                 <br>
