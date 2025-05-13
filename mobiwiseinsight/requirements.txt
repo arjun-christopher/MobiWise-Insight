@@ -13,3 +13,4 @@ email
 uuid
 logging
 google-generativeai
+twilio
