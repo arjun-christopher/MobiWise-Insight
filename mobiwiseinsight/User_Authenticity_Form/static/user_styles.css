@@ -82,8 +82,20 @@ h2, h3 {
     text-align: center;
     position: relative;
     top: -50px; /* Move the pop-up upwards */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+.modal-content .error-message {
+    min-height: 20px;
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    width: 90%;
+    box-sizing: border-box;
+    padding: 0 5px;
+}
 
 .close {
     position: absolute;
@@ -139,13 +151,23 @@ input[type="submit"]:hover {
 .error-message {
     color: red;
     font-size: 14px;
-    margin-top: 10px;
+    margin: 10px auto;
+    text-align: center;
+    width: 90%;
+    display: block;
+    box-sizing: border-box;
+    padding: 0 5px;
 }
 
 .success-message {
     color: green;
     font-size: 14px;
-    margin-top: 10px;
+    margin: 10px auto;
+    text-align: center;
+    width: 90%;
+    display: block;
+    box-sizing: border-box;
+    padding: 0 5px;
 }
 
 .info-message {
@@ -168,9 +190,9 @@ input[type="submit"]:hover {
     position: relative;
     display: flex;
     align-items: center; /* Ensures vertical alignment of content inside */
-    width: 90%;
-    max-width: 300px;
-    padding-left: 15px;
+    width: 94%;
+    max-width: 1000px;
+    padding-left: 5px;
 }
 
 .password-container input {
@@ -181,7 +203,7 @@ input[type="submit"]:hover {
 .password-container .toggle-password {
     color: var(--light-blue);
     position: absolute;
-    right: 10px;
+    right: 15px;
     width: 17px;  /* Match your icon size */
     height: 17px; /* Match your icon size */
     background: none;
@@ -198,14 +220,33 @@ input[type="submit"]:hover {
     color: var(--blue);
 }
 
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.modal-content form input,
+.modal-content form button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .modal-content form input[type="email"],
 .modal-content form input[type="text"],
 .modal-content form input[type="password"],
 .modal-content form button {
     width: 80%;
-    margin: 10px auto;
+    margin: 10px;
     padding: 10px;
 }
+
+/* .modal-content form input[type="password"] {
+    margin-left: -3px;
+    margin-right: 9px;
+    width: 90%;
+} */
 
 .modal-content form button {
     background-color: var(--light-blue);
