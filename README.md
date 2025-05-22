@@ -1,7 +1,7 @@
 # MobiWise Insight - Mini-Project
 
 <div align="center">
-  <img src="mobiwiseinsight/static/Logo - MobiWise Insight.png" alt="MobiWise Insight Logo" width="300">
+  <img src="mobiwiseinsight/static/Logo - MobiWise Insight.png" alt="MobiWise Insight Logo" width="400">
 </div>
 
 ## Overview
