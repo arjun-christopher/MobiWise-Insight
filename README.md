@@ -1,4 +1,7 @@
-# MobiWise Insight - Mini-Project
+<div align="center">
+  <img src="mobiwiseinsight/static/Logo - MobiWise Insight.png" alt="MobiWise Insight Logo" width="300">
+  <h1>MobiWise Insight - Mini-Project</h1>
+</div>
 
 ## Overview
 MobiWise Insight is a comprehensive platform for mobile management, e-commerce, and user engagement. It combines a Flask web application with AI-powered features, messaging utilities, and a Pygame-based mini-game. The project is modular, supporting admin/user authentication, order/discount/mobile management, and interactive features for both users and administrators.
@@ -46,6 +49,27 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
 ### 10. Scheduled Tasks
 - Background scheduler (APScheduler) checks carts and sends notifications periodically
 
+### 11. Enhanced User Experience
+- **Interactive Chatbot**: AI-powered chatbot with voice input support for mobile queries
+- **Contact Forms**: Integrated contact forms using Tally for user support
+- **Modern UI Elements**: Updated search interface with Font Awesome icons
+- **Responsive Design**: Improved mobile and desktop compatibility
+
+### 12. Voice-Enabled Features
+- Voice search functionality
+- Speech-to-text input support
+- Interactive voice responses
+
+### 13. Social Integration
+- Social media sharing options
+- User engagement tools
+- Community-driven content sharing
+
+### 14. Performance Optimizations
+- Lazy loading of images
+- Optimized asset delivery
+- Improved page load times
+
 ## Project Structure
 - `mobiwiseinsight/` - Main app
 - `Admin_Authenticity_Form/`, `User_Authenticity_Form/`, `Order_Form/`, `Discount_Form/`, `Mobile_Form/`, `Admin_Form/` - Modular form and admin apps
@@ -61,6 +85,33 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
   - `SRS References/` subfolder: supporting/reference materials
   - Useful for understanding system design, requirements, branding, and implementation details
 - `requirements.txt` - Python dependencies
+
+## New Features in Latest Update
+
+### 🎙️ Voice-Enabled Assistant
+- Interactive voice commands for hands-free navigation
+- Speech-to-text for search and form inputs
+- Voice feedback for actions
+
+### 📱 Enhanced Mobile Experience
+- Improved touch targets for better mobile interaction
+- Optimized performance for low-bandwidth connections
+- Offline access to recently viewed products
+
+### 🤖 AI-Powered Recommendations
+- Personalized mobile suggestions based on browsing history
+- Price drop alerts for wishlisted items
+- Smart search with natural language processing
+
+### 📊 User Engagement Tools
+- Interactive comparison tool for side-by-side specs
+- User reviews and ratings system
+- Community Q&A section
+
+### 🛠️ Developer Experience
+- Improved code documentation
+- Better error handling and logging
+- Enhanced API documentation
 
 ## Installation
 1. **Clone the repository:**
@@ -91,6 +142,25 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
     locust -f mobiwiseinsight/locustfile.py --host=http://localhost:5001
     ```
     Then open [http://localhost:8089](http://localhost:8089) in your browser to access the Locust web UI.
+
+## Tech Stack
+
+### Frontend
+- HTML5, CSS3, JavaScript (ES6+)
+- Font Awesome for icons
+- Tally for contact forms
+- Web Speech API for voice features
+
+### Backend
+- Python 3.8+
+- Flask web framework
+- SQL Database
+- JWT Authentication
+
+### AI & ML
+- Google's Gemini/Generative AI
+- Natural Language Processing
+- Recommendation Engine
 
 ## Dependencies
 See `requirements.txt` for the full list, including:
@@ -141,4 +211,4 @@ If you have any questions about which values to replace or best practices for se
 This project is for educational purposes. For commercial use, contact the author.
 
 ---
-_Last updated: 2025-05-04_
+_Last updated: 2025-05-23_
