@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='Icon - MobiWise Insight.png') }}">
     <!-- Include Font Awesome for cart icon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <title>MobiWise Insight</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='home_styles.css') }}">
@@ -129,7 +130,7 @@
         </a>
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search Mobiles" onclick="redirectToAllMobiles()">
-            <button id="search-btn">🔍</button>
+            <button id="search-btn"><i class="fa-brands fa-searchengin"></i></button>
         </div>
         <div id="cart-container">
             <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
@@ -289,12 +290,31 @@
             onclick="toggleChatbot()" alt="Chatbot">
         <!-- Chatbot Modal -->
         <div id="chatbot-modal" style="display: none;">
-            <div id="chatbot-header">MobiWise Chat Bot</div>
-            <div id="chatbot-body"></div>
+            <div id="chatbot-header">
+                <center><span>MobiWise Chat Bot</span></center>
+            </div>
+            <div id="chatbot-body">
+                <div class="welcome-message">
+                    <p>👋 Hello! I'm your MobiWise assistant. How can I help you today?</p>
+                    <p>Try asking:</p>
+                    <ul>
+                        <li>"Recommend a good phone under ₹30,000"</li>
+                        <li>"What's the difference between AMOLED and OLED?"</li>
+                        <li>"Show me the latest iPhone models"</li>
+                    </ul>
+                </div>
+            </div>
             <div id="chatbot-input-container">
-                <input type="text" id="chatbot-input" placeholder="Ask something..."
-                    onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()">Send</button>
+                <div class="input-wrapper">
+                    <input type="text" id="chatbot-input" placeholder="Type your message or tap the mic..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button id="mic-button" class="mic-button" onclick="toggleListening()" title="Speak">
+                        <i class="fa-solid fa-microphone" style="color: #0a7ed6;"></i>
+                    </button>
+                </div>
+                <button id="send-button" class="send-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
 
@@ -359,6 +379,14 @@
 
     </main>
     <footer>
+        <iframe src="https://tally.so/r/3qeQGd" 
+        width="100%" 
+        height="400" 
+        frameborder="0" 
+        marginheight="0" 
+        marginwidth="0" 
+        title="Contact Us">
+        </iframe>
         <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
     </footer>   
     
