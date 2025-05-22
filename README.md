@@ -39,33 +39,30 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
 ### 7. News & Updates
 - Fetches and displays the latest mobile news for users
 
-### 8. Pygame Mini-Game
-- Fun, custom mini-game themed around mobile devices (playable via `programs/test.py`)
-
-### 9. Admin Dashboard
+### 8. Admin Dashboard
 - Separate admin interfaces for managing users, mobiles, orders, and discounts
 - Real-time analytics and logs for monitoring activity
 
-### 10. Scheduled Tasks
+### 9. Scheduled Tasks
 - Background scheduler (APScheduler) checks carts and sends notifications periodically
 
-### 11. Enhanced User Experience
+### 10. Enhanced User Experience
 - **Interactive Chatbot**: AI-powered chatbot with voice input support for mobile queries
 - **Contact Forms**: Integrated contact forms using Tally for user support
 - **Modern UI Elements**: Updated search interface with Font Awesome icons
 - **Responsive Design**: Improved mobile and desktop compatibility
 
-### 12. Voice-Enabled Features
+### 11. Voice-Enabled Features
 - Voice search functionality
 - Speech-to-text input support
 - Interactive voice responses
 
-### 13. Social Integration
+### 12. Social Integration
 - Social media sharing options
 - User engagement tools
 - Community-driven content sharing
 
-### 14. Performance Optimizations
+### 13. Performance Optimizations
 - Lazy loading of images
 - Optimized asset delivery
 - Improved page load times
