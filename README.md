@@ -68,6 +68,22 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
 - Optimized asset delivery
 - Improved page load times
 
+### 14. Enhanced Mobile Viewing Experience
+- **Interactive Image Zoom**:
+  - Hover-to-zoom functionality for mobile images
+  - Smooth zoom transitions with crosshair cursor
+  - Responsive design that works on all device sizes
+  - Optimized for both touch and mouse interactions
+
+### 15. Future-Proofing Analysis
+- **Lifespan Prediction**:
+  - AI-powered analysis of mobile device longevity
+  - Detailed breakdown by key components (processor, battery, OS support, etc.)
+  - Visual score representation with color-coded indicators
+  - Responsive popup interface for detailed insights
+  - Interactive score breakdown with progress bars
+  - Real-time data fetching and display
+
 ## Project Structure
 - `mobiwiseinsight/` - Main app
 - `Admin_Authenticity_Form/`, `User_Authenticity_Form/`, `Order_Form/`, `Discount_Form/`, `Mobile_Form/`, `Admin_Form/` - Modular form and admin apps

@@ -21,12 +21,12 @@ import logging
 # Ensure the 'programs' folder is in the Python module path
 sys.path.append(os.path.join(os.path.dirname(__file__), "programs"))
 
-# Now you can import compare.py
 from compare import compare_and_recommend
 from whatsapp_msg import send_whatsapp_message, send_order_confirmation_whatsapp
 from ai_ad import generate_all_discount_ads
 from chatbot import get_chatbot_reply
 from email_msg import send_email
+from ai_mobile_lifespan import analyze_mobile_lifespan
 
 app = Flask(__name__)
 Compress(app)
@@ -211,6 +211,7 @@ def logout():
 
 def fetch_mobile_news():
     sources = [
+        "https://api.bestbuy.com/v1/products((search=smartphone))?apiKey=****MASKED****&format=json",
         "https://newsapi.org/v2/everything?q=smartphone%20OR%20%22mobile%20phone%22%20OR%20%22mobile%20technology%22&language=en&sortBy=publishedAt&apiKey=****MASKED****",
         "https://gnews.io/api/v4/search?q=smartphone%20OR%20%22mobile%20device%22&lang=en&sortby=publishedAt&token=****MASKED****",
         "https://api.currentsapi.services/v1/latest-news?keywords=smartphone%20technology&language=en&apiKey=****MASKED****",
@@ -218,6 +219,7 @@ def fetch_mobile_news():
         "https://api.thenewsapi.com/v1/news/all?api_token=****MASKED****&search=smartphones&language=en&limit=10",
         #"https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/search/NewsSearchAPI?q=smartphone&pageNumber=1&pageSize=10&autoCorrect=true",
         "http://api.mediastack.com/v1/news?access_key=****MASKED****&keywords=smartphone&languages=en",
+        "https://api.ebay.com/buy/browse/v1/item_summary/search?q=smartphone",
         #"https://content.guardianapis.com/search?q=smartphone&api-key=****MASKED****"
     ]
 
@@ -293,6 +295,48 @@ def mobile_details(mobile_id):
 
     finally:
         cursor.close()
+
+@app.route('/api/mobile/lifespan/<string:mobile_id>', methods=['GET'])
+def get_mobile_lifespan(mobile_id):
+    try:
+        cursor = conn.cursor()
+        # Get all relevant mobile details for the analysis
+        cursor.execute("""
+            SELECT * 
+            FROM Mobiles 
+            WHERE MobileID = ?
+        """, (mobile_id,))
+        
+        # Convert the row to a dictionary for easier access
+        columns = [column[0] for column in cursor.description]
+        mobile_data = dict(zip(columns, cursor.fetchone()))
+        cursor.close()
+
+        if not mobile_data:
+            return jsonify({"error": "Mobile not found"}), 404
+            
+        score, breakdown, overall_verdict = analyze_mobile_lifespan(mobile_data)
+        
+        # Map the breakdown keys to match the frontend expectations
+        mapped_breakdown = {
+            "os_support": breakdown.get("os_support", {"score": 0, "reasoning": "No data"}),
+            "processor": breakdown.get("processor", {"score": 0, "reasoning": "No data"}),
+            "battery": breakdown.get("battery", {"score": 0, "reasoning": "No data"}),
+            "connectivity": breakdown.get("connectivity", {"score": 0, "reasoning": "No data"}),
+            "storage": breakdown.get("storage_ram", {"score": 0, "reasoning": "No data"}),
+            "endurance": breakdown.get("build_quality", {"score": 0, "reasoning": "No data"}),
+            "ai_hardware": breakdown.get("ai_hardware", {"score": 0, "reasoning": "No data"})
+        }
+        
+        # Return the response in the expected format
+        return jsonify({
+            "score": score,
+            "overall_verdict": overall_verdict,
+            "breakdown": mapped_breakdown
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/all-mobiles')
 def all_mobiles():

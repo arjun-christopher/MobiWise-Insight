@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='mobile_details.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='order.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <script>
     let isUserLoggedIn = false;
 
@@ -52,14 +55,14 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mobile_id: mobileID })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("cart-success-popup").style.display = "block";
-            } else {
-                alert(data.message || "Failed to add to cart.");
-            }
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("cart-success-popup").style.display = "block";
+                } else {
+                    alert(data.message || "Failed to add to cart.");
+                }
+            });
     }
 
     function closeCartPopup() {
@@ -128,25 +131,25 @@
         const result = document.querySelector('.zoom-result');
         const resultImg = document.getElementById('zoomed-img');
         const zoomLevel = 2;
-        
+
         function initZoom() {
             // Size lens and result image
             const lensSize = Math.min(200, zoomImg.width / 2);
             lens.style.width = lens.style.height = lensSize + 'px';
-        
+
             resultImg.style.width = zoomImg.width * zoomLevel + 'px';
             resultImg.style.height = zoomImg.height * zoomLevel + 'px';
-        
+
             container.addEventListener('mouseenter', () => {
                 lens.style.display = 'block';
                 result.style.display = 'block';
             });
-        
+
             container.addEventListener('mouseleave', () => {
                 lens.style.display = 'none';
                 result.style.display = 'none';
             });
-        
+
             container.addEventListener('mousemove', (e) => {
                 const rect = zoomImg.getBoundingClientRect();
                 let x = e.pageX - rect.left - window.pageXOffset - lens.offsetWidth / 2;
@@ -163,14 +166,233 @@
             });
 
         }
-        
+
         if (zoomImg.complete) {
             initZoom();
         } else {
             zoomImg.onload = initZoom;
         }
     });
+
+    // Lifespan Popup Functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const lifespanButton = document.getElementById('lifespan-button');
+        const lifespanPopup = document.getElementById('lifespan-popup');
+
+        // Open popup
+        if (lifespanButton) {
+            lifespanButton.addEventListener('click', function () {
+                lifespanPopup.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling when popup is open
+            });
+        }
+
+        // Close popup when clicking outside the content
+        if (lifespanPopup) {
+            lifespanPopup.addEventListener('click', function (e) {
+                if (e.target === lifespanPopup) {
+                    closeLifespanPopup();
+                }
+            });
+        }
+
+        // Close popup with Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && lifespanPopup.classList.contains('active')) {
+                closeLifespanPopup();
+            }
+        });
+
+        function closeLifespanPopup() {
+            const popup = document.getElementById('lifespan-popup');
+            if (popup) {
+                popup.classList.remove('active');
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        }
+
+        // Make the close function available globally
+        window.closeLifespanPopup = closeLifespanPopup;
+    });
+
+    // Fetch and display mobile lifespan data
+    document.addEventListener('DOMContentLoaded', function () {
+        const mobileId = '{{ mobile.MOBILEID }}';
+        const scoreElement = document.getElementById('lifespan-score');
+        const verdictElement = document.getElementById('lifespan-verdict');
+        const breakdownElement = document.getElementById('lifespan-breakdown');
+
+        // Function to update the UI with lifespan data
+        function updateLifespanUI(data) {
+            if (!data) return;
+
+            // Update score
+            if (scoreElement && data.score !== undefined) {
+                scoreElement.textContent = Math.round(data.score);
+
+                // Update score circle color based on score
+                const scoreCircle = document.querySelector('.lifespan-score-circle');
+                if (scoreCircle) {
+                    if (data.score >= 80) {
+                        scoreCircle.style.background = '#4CAF50'; // Green
+                    } else if (data.score >= 60) {
+                        scoreCircle.style.background = '#FFC107'; // Yellow
+                    } else {
+                        scoreCircle.style.background = '#F44336'; // Red
+                    }
+                }
+            }
+
+            // Update verdict
+            if (verdictElement && data.overall_verdict) {
+                verdictElement.textContent = data.overall_verdict;
+            }
+
+            // Update breakdown
+            if (breakdownElement && data.breakdown) {
+                let html = '';
+                for (const [category, info] of Object.entries(data.breakdown)) {
+                    if (info && info.score !== undefined) {
+                        const categoryName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        const percentage = Math.round((info.score / 100) * 100);
+                        const scoreOutOf = category === 'ai_hardware' ? 5 :
+                            category === 'os_support' ? 25 :
+                                category === 'processor' ? 20 :
+                                    category === 'battery' || category === 'connectivity' ? 15 : 10;
+
+                        html += `
+                            <div class="breakdown-item">
+                                <div class="breakdown-header">
+                                    <span>${categoryName}</span>
+                                    <span class="breakdown-score">${Math.round(info.score)}/${scoreOutOf}</span>
+                                </div>
+                                <div class="score-bar">
+                                    <div class="score-bar-fill" style="width: ${percentage}%;"></div>
+                                </div>
+                                <p>${info.reasoning || 'No details available'}</p>
+                            </div>
+                        `;
+                    }
+                }
+                breakdownElement.innerHTML = html;
+            }
+        }
+
+        // Function to handle API errors
+        function handleError(error) {
+            console.error('Error fetching lifespan data:', error);
+            if (verdictElement) {
+                verdictElement.textContent = 'Could not load lifespan analysis. Please try again later.';
+                verdictElement.style.color = '#F44336';
+            }
+        }
+
+        // Fetch lifespan data from the API
+        fetch(`/api/mobile/lifespan/${mobileId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(updateLifespanUI)
+            .catch(handleError);
+
+        // Show loading state
+        scoreElement.textContent = '--';
+        verdictElement.textContent = 'Calculating device longevity...';
+
+        // Fetch lifespan data from the API
+        fetch(`/api/mobile/lifespan/${mobileId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch lifespan data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update the score
+                scoreElement.textContent = data.score;
+
+                // Update the verdict
+                if (data.overall_verdict) {
+                    verdictElement.textContent = data.overall_verdict;
+                }
+
+                // Update the breakdown
+                if (data.breakdown) {
+                    let breakdownHTML = '';
+                    for (const [key, value] of Object.entries(data.breakdown)) {
+                        // Format the key for display (e.g., 'os_support' -> 'OS Support')
+                        const displayKey = key.split('_')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ');
+
+                        // Create a progress bar for the score
+                        const maxScore = {
+                            'os_support': 25,
+                            'processor': 20,
+                            'battery': 15,
+                            'connectivity': 15,
+                            'storage': 10,
+                            'endurance': 10,
+                            'ai_hardware': 5
+                        }[key] || 100;
+
+                        const percentage = (value.score / maxScore) * 100;
+
+                        breakdownHTML += `
+                            <div class="breakdown-item" style="margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="font-weight: 500;">${displayKey}:</span>
+                                    <span>${value.score}/${maxScore}</span>
+                                </div>
+                                <div style="height: 8px; background-color: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${percentage}%; background-color: #30b2e6;"></div>
+                                </div>
+                                <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">
+                                    ${value.reasoning}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    breakdownElement.innerHTML = breakdownHTML;
+                }
+
+                // Update the score circle color based on the score
+                const score = data.score;
+                const scoreCircle = document.querySelector('.lifespan-score-circle');
+                if (score >= 80) {
+                    scoreCircle.style.background = '#28a745'; // Green
+                } else if (score >= 60) {
+                    scoreCircle.style.background = '#ffc107'; // Yellow
+                    scoreCircle.style.color = '#212529';
+                } else {
+                    scoreCircle.style.background = '#dc3545'; // Red
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching lifespan data:', error);
+                verdictElement.textContent = 'Could not load lifespan data. Please try again later.';
+                verdictElement.style.color = '#dc3545';
+            });
+    });
+    var disqus_config = function () {
+        this.page.url = "{{ request.url }}";  // Dynamic page URL
+        this.page.identifier = "mobile-{{ mobile.MobileID }}";  // Unique for each mobile
+    };
+
+    (function () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://mobiwise-insight.disqus.com/embed.js';  // Replace with your Disqus shortname
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
 </script>
+
+<noscript>
+    Please enable JavaScript to view the comments powered by Disqus.
+</noscript>
 
 <body>
     <header>
@@ -185,7 +407,7 @@
             <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
         </div>
     </header>
-    
+
     <div class="profile-dropdown-wrapper">
         {% if user %}
         <div class="user-profile">
@@ -198,18 +420,24 @@
             </div>
         </div>
         {% else %}
-        <a href="http://127.0.0.1:5002/" class="login-text" style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
+        <a href="http://127.0.0.1:5002/" class="login-text"
+            style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
         {% endif %}
     </div>
-    
+
     <nav>
         <ul>
             <li><a href="{{ url_for('homepage') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
-            <li><a href="{{ url_for('all_mobiles') }}" class="{% if request.path.startswith('/all-mobiles') or request.path.startswith('/mobile-details/') %}active{% endif %}">Mobiles</a></li>
-            <li><a href="{{ url_for('compare_mobiles_page') }}" class="{% if request.path == '/compare-mobiles' %}active{% endif %}">Compare Mobiles</a></li>
+            <li><a href="{{ url_for('all_mobiles') }}"
+                    class="{% if request.path.startswith('/all-mobiles') or request.path.startswith('/mobile-details/') %}active{% endif %}">Mobiles</a>
+            </li>
+            <li><a href="{{ url_for('compare_mobiles_page') }}"
+                    class="{% if request.path == '/compare-mobiles' %}active{% endif %}">Compare Mobiles</a></li>
             <li><a href="{{ url_for('order_details') }}"
-                    class="{% if request.path == '/order-details' or request.path == '/order-history' %}active{% endif %}">Orders</a></li>
-            <li><a href="{{ url_for('latest_news') }}" class="{% if request.path == '/latest-news' %}active{% endif %}">Latest News</a></li>
+                    class="{% if request.path == '/order-details' or request.path == '/order-history' %}active{% endif %}">Orders</a>
+            </li>
+            <li><a href="{{ url_for('latest_news') }}"
+                    class="{% if request.path == '/latest-news' %}active{% endif %}">Latest News</a></li>
         </ul>
     </nav>
     <main>
@@ -219,7 +447,8 @@
         <div class="mobile-details-container">
             <div class="mobile-image">
                 <div class="zoom-container" id="zoom-container">
-                    <img id="zoom-img" class="zoom-img" src="{{ mobile.IMAGES }}" alt="{{ mobile.MODEL }}" data-zoom-image="{{ mobile.IMAGES }}">
+                    <img id="zoom-img" class="zoom-img" src="{{ mobile.IMAGES }}" alt="{{ mobile.MODEL }}"
+                        data-zoom-image="{{ mobile.IMAGES }}">
                     <div class="zoom-lens"></div>
                     <div class="zoom-result">
                         <img id="zoomed-img" src="{{ mobile.IMAGES }}" alt="Zoomed view">
@@ -250,12 +479,42 @@
                 <p><strong>Release Date:</strong> {{ mobile.RELEASEDATE }}</p>
 
                 <div class="button-group">
-                    <button class="buy-now" data-id="{{ mobile.MOBILEID }}" data-model="{{ mobile.MODEL }}" data-price="{{ mobile.PRICE }}"
-                        data-image="{{ mobile.IMAGES }}">
+                    <button class="buy-now" data-id="{{ mobile.MOBILEID }}" data-model="{{ mobile.MODEL }}"
+                        data-price="{{ mobile.PRICE }}" data-image="{{ mobile.IMAGES }}">
                         Buy Now
                     </button>
 
                     <button class="add-to-cart" onclick="addToCart('{{ mobile.MOBILEID }}')">Add to Cart</button>
+                </div>
+
+                <!-- Lifespan Button -->
+                <div class="lifespan-button-container">
+                    <button id="lifespan-button" class="lifespan-button">
+                        <i class="fas fa-chart-line"></i> View Future-Proofing Analysis
+                    </button>
+                </div>
+
+                <!-- Lifespan Popup -->
+                <div id="lifespan-popup" class="lifespan-popup">
+                    <div class="lifespan-popup-content">
+                        <div class="lifespan-popup-header">
+                            <h2 class="lifespan-popup-title">Future-Proofing Analysis</h2>
+                        </div>
+                        <div class="lifespan-section">
+                            <div class="lifespan-score-container">
+                                <div class="lifespan-score-circle">
+                                    <span id="lifespan-score">--</span>/100
+                                </div>
+                                <p id="lifespan-verdict" class="lifespan-verdict">Calculating device longevity...</p>
+                            </div>
+                            <div class="lifespan-breakdown">
+                                <h4 class="breakdown-title">Score Breakdown</h4>
+                                <div id="lifespan-breakdown" class="breakdown-grid">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -271,10 +530,10 @@
             <div class="checkout-content">
                 <span class="close-checkout" onclick="closeCheckoutModal()">&times;</span>
                 <h2>Checkout</h2>
-        
+
                 <form id="checkout-form">
                     <br>
-        
+
                     <!-- User Info -->
                     <h3>User Details</h3>
                     <div class="form-group">
@@ -290,7 +549,7 @@
                         <input type="text" id="user-phone" readonly>
                     </div>
                     <br>
-        
+
                     <!-- Address Fields -->
                     <h3>Shipping Address</h3>
                     <div class="form-group">
@@ -314,15 +573,15 @@
                         <input type="text" id="pincode" required>
                     </div>
                     <br>
-        
+
                     <!-- Order Summary -->
                     <h3>Order Summary</h3>
                     <ul id="checkout-items-list"></ul>
-        
+
                     <h3>Total Items: <strong><span id="total-items">{{ total_items }}</span></strong></h3>
                     <h3>Grand Total: <strong><span id="grand-total">₹{{ grand_total }}</span></strong></h3>
                     <br>
-        
+
                     <!-- Payment -->
                     <h3>Payment</h3>
                     <div class="form-group">
@@ -334,10 +593,10 @@
                         </select>
                     </div>
                     <br>
-        
+
                     <input type="hidden" id="phone" value="{{ user.phone }}">
                     <input type="hidden" id="user_name" value="{{ user.username }}">
-        
+
                     <button id="checkout-button" type="submit">Confirm Order</button>
                 </form>
             </div>
@@ -378,54 +637,36 @@
         <div class="disqus-wrapper">
             <section class="discussion-section">
                 <h2 class="discussion-title">User Discussions</h2>
-            
-                {% if user %}
-                    <p class="comment-tip">
-                        You are logged in as <strong>{{ user['username'] }}</strong> on MobiWise.
-                        <br>
-                        Please use the same name when commenting on Disqus to maintain identity.
-                    </p>
-                    <div id="disqus_thread" class="discussion-box"></div>
 
-                    <script>
-                        var disqus_config = function () {
-                            this.page.url = "{{ request.url }}";
-                            this.page.identifier = "mobile-{{ mobile.MobileID }}";
-                        };
-                        (function () {
-                            var d = document, s = d.createElement('script');
-                            s.src = 'https://mobiwise-insight.disqus.com/embed.js';
-                            s.setAttribute('data-timestamp', +new Date());
-                            (d.head || d.body).appendChild(s);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
-            
+                {% if user %}
+                <p class="comment-tip">
+                    You are logged in as <strong>{{ user['username'] }}</strong> on MobiWise.
+                    <br>
+                    Please use the same name when commenting on Disqus to maintain identity.
+                </p>
+                <div id="disqus_thread" class="discussion-box"></div>
+
+                <script>
+                    var disqus_config = function () {
+                        this.page.url = "{{ request.url }}";
+                        this.page.identifier = "mobile-{{ mobile.MobileID }}";
+                    };
+                    (function () {
+                        var d = document, s = d.createElement('script');
+                        s.src = 'https://mobiwise-insight.disqus.com/embed.js';
+                        s.setAttribute('data-timestamp', +new Date());
+                        (d.head || d.body).appendChild(s);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+
                 {% else %}
-                    <div class="comment-overlay">
-                        <p>Login to participate in the discussion 🔒</p>
-                        <a href="http://127.0.0.1:5002/">Click here to Login</a>
-                    </div>
+                <div class="comment-overlay">
+                    <p>Login to participate in the discussion 🔒</p>
+                    <a href="http://127.0.0.1:5002/">Click here to Login</a>
+                </div>
                 {% endif %}
             </section>
-
-            <script>
-                var disqus_config = function () {
-                    this.page.url = "{{ request.url }}";  // Dynamic page URL
-                    this.page.identifier = "mobile-{{ mobile.MobileID }}";  // Unique for each mobile
-                };
-
-                (function () {
-                    var d = document, s = d.createElement('script');
-                    s.src = 'https://mobiwise-insight.disqus.com/embed.js';  // Replace with your Disqus shortname
-                    s.setAttribute('data-timestamp', +new Date());
-                    (d.head || d.body).appendChild(s);
-                })();
-            </script>
-            
-            <noscript>
-                Please enable JavaScript to view the comments powered by Disqus.
-            </noscript>
         </div>
 
         <div id="login-popup" class="cart-popup" style="display: none;">
@@ -435,22 +676,18 @@
         </div>
 
     </main>
+
     <footer>
-        <iframe src="https://tally.so/r/3qeQGd" 
-        width="100%" 
-        height="400" 
-        frameborder="0" 
-        marginheight="0" 
-        marginwidth="0" 
-        title="Contact Us">
+        <iframe src="https://tally.so/r/3qeQGd" width="100%" height="400" frameborder="0" marginheight="0"
+            marginwidth="0" title="Contact Us">
         </iframe>
         <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
-    </footer>   
-    
+    </footer>
+
     <script src="{{ url_for('static', filename='search_mobiles.js') }}"></script>
     <script src="{{ url_for('static', filename='cart.js') }}"></script>
     <script src="{{ url_for('static', filename='order.js') }}"></script>
     <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
-    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script>  
+    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script>
 </body>
 </html>
