@@ -283,7 +283,11 @@ async function compareMobiles() {
                     },
                     title: {
                         display: true,
-                        text: 'Which Mobile Wins More Features?'
+                        text: 'Which Mobile Wins More Features?',
+                        color: '#30b2e6',
+                        font: {
+                            size: 16
+                        }
                     }
                 }
             }
@@ -297,7 +301,7 @@ async function compareMobiles() {
         Object.entries(featureMap).forEach(([model, features]) => {
             breakdownContainer.innerHTML += `
                 <div style="margin-bottom: 20px;">
-                    <strong>${model}</strong>
+                    <strong style="color: #30b2e6; font-size: 1.1em; display: block; margin-bottom: 8px;">${model}</strong>
                     <div class="feature-tags" style="
                         display: flex;
                         gap: 6px;
@@ -307,12 +311,13 @@ async function compareMobiles() {
                         border-radius: 8px;
                     ">
                         ${features.map(f => `<span style="
-                            background-color: var(--light-blue);
+                            background-color: #30b2e6;
                             padding: 6px 12px;
                             border-radius: 16px;
                             font-size: 14px;
                             color: white;
                             white-space: nowrap;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                         ">${f}</span>`).join('')}
                     </div>
                 </div>

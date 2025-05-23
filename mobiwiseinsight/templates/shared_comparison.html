@@ -305,7 +305,11 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Which Mobile Wins More Features?'
+                                text: 'Which Mobile Wins More Features?',
+                                color: '#30b2e6',
+                                font: {
+                                    size: 16
+                                }
                             }
                         }
                     }
@@ -317,7 +321,7 @@
                 Object.entries(featureMap).forEach(([model, features]) => {
                     breakdownContainer.innerHTML += `
                         <div style="margin-bottom: 20px;">
-                            <strong>${model}</strong>
+                            <strong style="color: #30b2e6; font-size: 1.1em; display: block; margin-bottom: 8px;">${model}</strong>
                             <div class="feature-tags" style="
                                 display: flex;
                                 gap: 6px;

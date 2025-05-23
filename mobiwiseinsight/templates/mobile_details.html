@@ -121,6 +121,55 @@
         document.getElementById("login-popup").style.display = "none";
     }
 
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('zoom-container');
+        const zoomImg = document.getElementById('zoom-img');
+        const lens = document.querySelector('.zoom-lens');
+        const result = document.querySelector('.zoom-result');
+        const resultImg = document.getElementById('zoomed-img');
+        const zoomLevel = 2;
+        
+        function initZoom() {
+            // Size lens and result image
+            const lensSize = Math.min(200, zoomImg.width / 2);
+            lens.style.width = lens.style.height = lensSize + 'px';
+        
+            resultImg.style.width = zoomImg.width * zoomLevel + 'px';
+            resultImg.style.height = zoomImg.height * zoomLevel + 'px';
+        
+            container.addEventListener('mouseenter', () => {
+                lens.style.display = 'block';
+                result.style.display = 'block';
+            });
+        
+            container.addEventListener('mouseleave', () => {
+                lens.style.display = 'none';
+                result.style.display = 'none';
+            });
+        
+            container.addEventListener('mousemove', (e) => {
+                const rect = zoomImg.getBoundingClientRect();
+                let x = e.pageX - rect.left - window.pageXOffset - lens.offsetWidth / 2;
+                let y = e.pageY - rect.top - window.pageYOffset - lens.offsetHeight / 2;
+
+                x = Math.max(0, Math.min(x, zoomImg.width - lens.offsetWidth));
+                y = Math.max(0, Math.min(y, zoomImg.height - lens.offsetHeight));
+
+                lens.style.left = `${x}px`;
+                lens.style.top = `${y}px`;
+
+                resultImg.style.left = `${-x * zoomLevel}px`;
+                resultImg.style.top = `${-y * zoomLevel}px`;
+            });
+
+        }
+        
+        if (zoomImg.complete) {
+            initZoom();
+        } else {
+            zoomImg.onload = initZoom;
+        }
+    });
 </script>
 
 <body>
@@ -169,8 +218,16 @@
         <!-- Mobile Details Section -->
         <div class="mobile-details-container">
             <div class="mobile-image">
-                <img src="{{ mobile.IMAGES }}" alt="{{ mobile.MODEL }}">
-                <br>
+                <div class="zoom-container" id="zoom-container">
+                    <img id="zoom-img" class="zoom-img" src="{{ mobile.IMAGES }}" alt="{{ mobile.MODEL }}" data-zoom-image="{{ mobile.IMAGES }}">
+                    <div class="zoom-lens"></div>
+                    <div class="zoom-result">
+                        <img id="zoomed-img" src="{{ mobile.IMAGES }}" alt="Zoomed view">
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <small style="color: #30b2e6; font-weight: 500;">Hover over the image to zoom</small>
+                </div>
                 <p class="description">{{ mobile.DESCRIPTION }}</p>
             </div>
 
@@ -394,6 +451,6 @@
     <script src="{{ url_for('static', filename='cart.js') }}"></script>
     <script src="{{ url_for('static', filename='order.js') }}"></script>
     <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
-    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script> 
+    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script>  
 </body>
 </html>

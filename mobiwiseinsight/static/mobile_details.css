@@ -274,3 +274,50 @@
     max-height: 80px; /* Adjust to your desired height */
     overflow-y: auto;
 }
+
+.zoom-container {
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    cursor: crosshair;
+    overflow: hidden;
+}
+.zoom-img {
+    width: 100%;
+    display: block;
+}
+
+.zoom-result {
+    position: fixed; /* Changed from absolute to fixed */
+    right: 150px;     /* Fixed distance from the right edge */
+    top: 62%;        /* Center vertically */
+    transform: translateY(-50%); /* Vertically center the div */
+    width: 450px;
+    height: 450px;
+    overflow: hidden;
+    background: #f8f8f8;
+    display: none;
+    z-index: 1000;
+    border: 1px solid #30b2e6;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.zoom-result img {
+    position: absolute;
+    max-width: none !important;
+    max-height: none !important;
+    top: 0;
+    left: 0;
+}
+    
+.zoom-lens {
+    position: absolute;
+    border: 2px solid #30b2e6;
+    background: rgba(255, 255, 255, 0.2);
+    display: none;
+    z-index: 100;
+    pointer-events: none;
+    width: 200px;
+    height: 200px;
+    cursor: crosshair;
+}
