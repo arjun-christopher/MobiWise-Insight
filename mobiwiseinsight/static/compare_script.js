@@ -255,7 +255,6 @@ async function compareMobiles() {
                                 const count = context.formattedValue;
                                 const features = featureMap[model] || [];
                                 return [
-                                    `${model}`,
                                     `Features Won: ${count}`
                                 ];
                             }
