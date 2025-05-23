@@ -214,6 +214,24 @@
                                 <p><strong>Price:</strong> ${suggestion.price}</p>
                                 <p><strong>Why Recommended:</strong> ${suggestion.reason}</p>
                             </div>
+                            <button onclick="speakSuggestion()" style="
+                                margin-top: 10px;
+                                padding: 10px 20px;
+                                background-color: #00b4d8;
+                                color: white;
+                                border: none;
+                                border-radius: 25px;
+                                cursor: pointer;
+                                font-weight: bold;
+                                font-size: 14px;
+                                transition: all 0.3s ease;
+                                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                            " onmouseover="this.style.backgroundColor='#0077b6'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
+                            onmouseout="this.style.backgroundColor='#00b4d8'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.1)'"
+                            onmousedown="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+                            onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'">
+                                Hear Suggestion
+                            </button>
                         </div>`;
                 }
 
@@ -328,6 +346,245 @@
         }
 
         fetchSharedComparison();
+
+        // Voice configuration
+        const VOICE_STORAGE_KEY = 'mobiwiseVoice';
+        let currentVoice = null;
+        let voicesLoaded = false;
+
+        // Load voices when the page loads
+        function loadVoices() {
+            return new Promise((resolve) => {
+                const voices = window.speechSynthesis.getVoices();
+                if (voices.length) {
+                    voicesLoaded = true;
+                    console.log('Voices loaded on page load:', voices);
+                    resolve(voices);
+                } else {
+                    // Some browsers need this event to load voices
+                    window.speechSynthesis.onvoiceschanged = () => {
+                        const voices = window.speechSynthesis.getVoices();
+                        console.log('Voices loaded via onvoiceschanged:', voices);
+                        voicesLoaded = true;
+                        resolve(voices);
+                    };
+                }
+            });
+        }
+
+        function saveVoice(voice) {
+            if (!voice || !voice.voiceURI) return;
+            
+            currentVoice = voice;
+            const voiceData = {
+                voiceURI: voice.voiceURI,
+                name: voice.name,
+                lang: voice.lang
+            };
+            
+            try {
+                sessionStorage.setItem(VOICE_STORAGE_KEY, JSON.stringify(voiceData));
+                console.log('Voice saved:', voiceData);
+            } catch (e) {
+                console.error('Error saving voice:', e);
+            }
+        }
+
+        async function findVoice() {
+            console.log('Finding voice...');
+            
+            // Wait for voices to load
+            const voices = await loadVoices();
+            
+            if (!voices || voices.length === 0) {
+                console.error('No voices available');
+                return null;
+            }
+
+            console.log('All available voices:', voices);
+
+            // 1. Check if current voice is still available
+            if (currentVoice) {
+                const voice = voices.find(v => v.voiceURI === currentVoice.voiceURI);
+                if (voice) {
+                    console.log('Using current voice:', voice);
+                    return voice;
+                }
+            }
+
+            // 2. Try to load from session storage
+            try {
+                const savedData = sessionStorage.getItem(VOICE_STORAGE_KEY);
+                if (savedData) {
+                    const savedVoice = JSON.parse(savedData);
+                    console.log('Loaded saved voice data:', savedVoice);
+                    
+                    // Find the saved voice in available voices
+                    const voice = voices.find(v => v.voiceURI === savedVoice.voiceURI);
+                    if (voice) {
+                        console.log('Using saved voice:', voice);
+                        currentVoice = voice;
+                        return voice;
+                    }
+                    console.log('Saved voice not found in available voices');
+                } else {
+                    console.log('No saved voice data found');
+                }
+            } catch (e) {
+                console.error('Error loading saved voice:', e);
+            }
+
+            // If no saved voice or it's not available, find a new female voice
+            const femaleVoices = voices.filter(voice => {
+                const name = voice.name.toLowerCase();
+                return (
+                    name.includes('female') || 
+                    name.includes('zira') ||
+                    name.includes('susan') ||
+                    name.includes('hazel') ||
+                    name.includes('eva') ||
+                    name.includes('google uk english female') ||
+                    name.includes('google us english female') ||
+                    name.includes('microsoft zira desktop') ||
+                    (voice.gender && voice.gender.toLowerCase() === 'female')
+                ) && voice.lang.includes('en');
+            });
+            
+            if (femaleVoices.length > 0) {
+                // Save the first matching female voice
+                const selectedVoice = femaleVoices[0];
+                console.log('Selected female voice:', selectedVoice);
+                saveVoice(selectedVoice);
+                return selectedVoice;
+            }
+            
+            // Fallback to any English voice
+            const englishVoices = voices.filter(voice => voice.lang.includes('en'));
+            if (englishVoices.length > 0) {
+                const selectedVoice = englishVoices[0];
+                console.log('Selected English voice:', selectedVoice);
+                saveVoice(selectedVoice);
+                return selectedVoice;
+            }
+            
+            // Last resort: use the first available voice
+            if (voices.length > 0) {
+                console.log('Using first available voice:', voices[0]);
+                saveVoice(voices[0]);
+                return voices[0];
+            }
+            
+            console.error('No suitable voice found');
+            return null;
+        }
+
+        // Track if speech is currently active
+        let isSpeaking = false;
+
+        async function speakSuggestion() {
+            console.log('Speak button clicked');
+            
+            // If already speaking, stop and return
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                updateButtonText(false);
+                console.log('Speech stopped by user');
+                return;
+            }
+            
+            try {
+                // Get the mobile info div (exclude the button)
+                const mobileInfoDiv = document.querySelector('.best-mobile .best-mobile-info');
+                if (!mobileInfoDiv) {
+                    console.error('No suggestion content found');
+                    alert('No suggestion available to read');
+                    return;
+                }
+                
+                // Extract only the text content from the mobile info div
+                const suggestionText = mobileInfoDiv.innerText || mobileInfoDiv.textContent;
+                if (!suggestionText || suggestionText.trim() === '') {
+                    console.error('Empty suggestion text');
+                    alert('No text content found to read');
+                    return;
+                }
+                
+                console.log('Text to speak:', suggestionText);
+                
+                // Create speech utterance
+                const msg = new SpeechSynthesisUtterance(suggestionText);
+                msg.volume = 1; // 0 to 1
+                msg.rate = 0.9; // Slightly slower rate for better clarity
+                msg.pitch = 1;
+                msg.lang = 'en-US';
+                
+                // Find and set the voice
+                const selectedVoice = await findVoice();
+                if (!selectedVoice) {
+                    console.error('No suitable voice found');
+                    alert('No suitable voice found. Please check your text-to-speech settings.');
+                    return;
+                }
+                
+                console.log('Selected voice:', selectedVoice);
+                msg.voice = selectedVoice;
+                
+                // Save the selected voice for future use
+                saveVoice(selectedVoice);
+                
+                // Set up event handlers
+                msg.onstart = () => {
+                    isSpeaking = true;
+                    updateButtonText(true);
+                    console.log('Speech started');
+                };
+                
+                msg.onend = () => {
+                    isSpeaking = false;
+                    updateButtonText(false);
+                    console.log('Speech ended');
+                };
+                
+                msg.onerror = (event) => {
+                    console.error('Speech error:', event);
+                    isSpeaking = false;
+                    updateButtonText(false);
+                    
+                    // If there's an error, clear the saved voice
+                    if (event.error === 'synthesis-failed') {
+                        console.log('Clearing saved voice due to error');
+                        sessionStorage.removeItem(VOICE_STORAGE_KEY);
+                        currentVoice = null;
+                    }
+                };
+                
+                // Start speaking
+                console.log('Starting speech synthesis...');
+                window.speechSynthesis.speak(msg);
+                
+            } catch (error) {
+                console.error('Error in speakSuggestion:', error);
+                isSpeaking = false;
+                updateButtonText(false);
+                alert('An error occurred while trying to read the suggestion.');
+            }
+        }
+
+        // Update button text based on speaking state
+        function updateButtonText(isSpeaking) {
+            const buttons = document.querySelectorAll('button[onclick="speakSuggestion()"]');
+            buttons.forEach(button => {
+                button.textContent = isSpeaking ? 'Stop Speaking' : 'Hear Suggestion';
+            });
+            
+            // Also update the button in the suggestion result if it exists
+            const suggestionButton = document.querySelector('.best-mobile button');
+            if (suggestionButton) {
+                suggestionButton.textContent = isSpeaking ? 'Stop Speaking' : 'Hear Suggestion';
+            }
+        }
+
     </script>
 
     <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script> 
