@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +13,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='order.css') }}">
 </head>
+
 <script>
-    
+
     function toggleProfileMenu() {
         const dropdown = document.getElementById("profile-dropdown");
         dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
@@ -33,6 +35,7 @@
         window.location.reload(); // Refresh to update header
     }
 </script>
+
 <body>
     <header>
         <a href="http://127.0.0.1:5001/">
@@ -46,7 +49,7 @@
             <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
         </div>
     </header>
-    
+
     <div class="profile-dropdown-wrapper">
         {% if user %}
         <div class="user-profile">
@@ -63,7 +66,7 @@
             style="top: 10%; z-index: 9999; position: fixed;">Login/SignUp</a>
         {% endif %}
     </div>
-    
+
     <nav>
         <ul>
             <li><a href="{{ url_for('homepage') }}" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
@@ -82,133 +85,130 @@
 
     <main>
         {% if not user %}
-            <div class="no-cart-container">
-                <img src="{{ url_for('static', filename='empty-cart.png') }}" alt="No Cart Items" class="no-cart-img">
-                <h2>Cart is Empty!</h2>
-                
-            </div>
+        <div class="no-cart-container">
+            <img src="{{ url_for('static', filename='empty-cart.png') }}" alt="No Cart Items" class="no-cart-img">
+            <h2>Cart is Empty!</h2>
+
+        </div>
         {% else %}
-            <section class="cart-section">
-                <h2>Total Items: <strong><span id="total-items">{{ total_items }}</span></strong></h2>
-                <h2>Grand Total: <strong><span id="grand-total">₹ {{ grand_total }}</span></strong></h2>
+        <section class="cart-section">
+            <h2>Total Items: <strong><span id="total-items">{{ total_items }}</span></strong></h2>
+            <h2>Grand Total: <strong><span id="grand-total">₹ {{ grand_total }}</span></strong></h2>
 
-                <ul id="cart-items-list">
-                    {% for item in cart_items %}
-                    <li class="cart-item">
-                        <a href="/mobile-details/{{ item.mobile_id }}" class="cart-item-link">
-                            <div class="cart-item-image">
-                                <img src="{{ item.image }}" alt="{{ item.model }}">
-                            </div>
-                            <div class="cart-item-details">
-                                <h3>{{ item.model }}</h3>
-                                <p class="cart-item-brand">{{ item.brand }}</p>
-                                <p class="cart-item-price">₹{{ item.price }}</p>
-                            </div>
-                        </a>
-                        <button data-value="{{ item.mobile_id }}" class="cart-item-remove" onclick="removeFromCart(this)">Remove</button>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <ul id="cart-items-list">
+                {% for item in cart_items %}
+                <li class="cart-item">
+                    <a href="/mobile-details/{{ item.mobile_id }}" class="cart-item-link">
+                        <div class="cart-item-image">
+                            <img src="{{ item.image }}" alt="{{ item.model }}">
+                        </div>
+                        <div class="cart-item-details">
+                            <h3>{{ item.model }}</h3>
+                            <p class="cart-item-brand">{{ item.brand }}</p>
+                            <p class="cart-item-price">₹{{ item.price }}</p>
+                        </div>
+                    </a>
+                    <button data-value="{{ item.mobile_id }}" class="cart-item-remove"
+                        onclick="removeFromCart(this)">Remove</button>
+                </li>
+                {% endfor %}
+            </ul>
 
-                <div class="cart-footer">
-                    <button onclick="checkout()">Proceed to Checkout</button>
-                </div>
-            </section>
-
-            <!-- Checkout Modal -->
-            <div id="checkout-modal" class="checkout-modal">
-                <div class="checkout-content">
-                    <span class="close-checkout" onclick="closeCheckoutModal()">&times;</span>
-                    <h2>Checkout</h2>
-            
-                    <form id="checkout-form">
-                        <br>
-
-                        <!-- User Info -->
-                        <h3>User Details</h3>
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" id="user-name" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="user-email" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <input type="text" id="user-phone" readonly>
-                        </div>
-                        <br>
-
-                        <!-- Address Fields -->
-                        <h3>Shipping Address</h3>
-                        <div class="form-group">
-                            <label>Door & Street</label>
-                            <input type="text" id="door-street" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Locality</label>
-                            <textarea id="locality" rows="4" cols="38" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>City</label>
-                            <input type="text" id="city" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Country</label>
-                            <input type="text" id="country" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Pincode</label>
-                            <input type="text" id="pincode" required>
-                        </div>
-                        <br>
-
-                        <!-- Order Summary -->
-                        <h3>Order Summary</h3>
-                        <ul id="checkout-items-list"></ul>
-
-                        <h3>Total Items: <strong><span id="total-items">{{ total_items }}</span></strong></h3>
-                        <h3>Grand Total: <strong><span id="grand-total">₹{{ grand_total }}</span></strong></h3>
-                        <br>
-
-                        <!-- Payment -->
-                        <h3>Payment</h3>
-                        <div class="form-group">
-                            <label>Payment Method</label>
-                            <select id="payment-method">
-                                <option>Cash on Delivery</option>
-                                <option disabled>UPI (Coming Soon)</option>
-                                <option disabled>Card Payment (Coming Soon)</option>
-                            </select>
-                        </div>
-                        <br>
-                        
-                        <input type="hidden" id="phone" value="{{ user.phone }}">
-                        <input type="hidden" id="user_name" value="{{ user.username }}">
-                        
-                        <button id="checkout-button" type="submit">Confirm Order</button>
-                    </form>
-                </div>
+            <div class="cart-footer">
+                <button onclick="checkout()">Proceed to Checkout</button>
             </div>
+        </section>
+
+        <!-- Checkout Modal -->
+        <div id="checkout-modal" class="checkout-modal">
+            <div class="checkout-content">
+                <div class="checkout-header">
+                    <h2>Checkout</h2>
+                </div>
+                <form id="checkout-form">
+                    <br>
+
+                    <!-- User Info -->
+                    <h3>User Details</h3>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="user-name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="user-email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="user-phone" readonly>
+                    </div>
+                    <br>
+
+                    <!-- Address Fields -->
+                    <h3>Shipping Address</h3>
+                    <div class="form-group">
+                        <label>Door & Street</label>
+                        <input type="text" id="door-street" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Locality</label>
+                        <textarea id="locality" rows="4" cols="38" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" id="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Country</label>
+                        <input type="text" id="country" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pincode</label>
+                        <input type="text" id="pincode" required>
+                    </div>
+                    <br>
+
+                    <!-- Order Summary -->
+                    <h3>Order Summary</h3>
+                    <ul id="checkout-items-list"></ul>
+
+                    <h3>Total Items: <strong><span id="total-items">{{ total_items }}</span></strong></h3>
+                    <h3>Grand Total: <strong><span id="grand-total">₹{{ grand_total }}</span></strong></h3>
+                    <br>
+
+                    <!-- Payment -->
+                    <h3>Payment</h3>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="payment-method">
+                            <option>Cash on Delivery</option>
+                            <option disabled>UPI (Coming Soon)</option>
+                            <option disabled>Card Payment (Coming Soon)</option>
+                        </select>
+                    </div>
+                    <br>
+
+                    <input type="hidden" id="phone" value="{{ user.phone }}">
+                    <input type="hidden" id="user_name" value="{{ user.username }}">
+
+                    <button id="checkout-button" type="submit">Confirm Order</button>
+                </form>
+            </div>
+        </div>
         {% endif %}
     </main>
 
     <footer>
-        <iframe src="https://tally.so/r/3qeQGd" 
-        width="100%" 
-        height="400" 
-        frameborder="0" 
-        marginheight="0" 
-        marginwidth="0" 
-        title="Contact Us">
+        <iframe src="https://tally.so/r/3qeQGd" width="100%" height="400" frameborder="0" marginheight="0"
+            marginwidth="0" title="Contact Us">
         </iframe>
         <p>© 2025 MobiWise Insight | <a href="http://127.0.0.1:5003/" class="admin-link">Admin Portal</a></p>
     </footer>
-    
+
     <script src="{{ url_for('static', filename='search_mobiles.js') }}"></script>
     <script src="{{ url_for('static', filename='cart.js') }}"></script>
     <script src="{{ url_for('static', filename='order.js') }}"></script>
-    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script> 
+    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script>
 </body>
+
 </html>

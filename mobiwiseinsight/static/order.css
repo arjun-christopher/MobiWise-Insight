@@ -32,12 +32,26 @@ h3 {
     position: relative;
 }
 
-.close-checkout {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 28px;
-    cursor: pointer;
+.checkout-header {
+    background: #30b2e6;
+    color: white;
+    padding: 10px 0;
+    margin: -30px -30px 20px -30px;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+}
+
+.checkout-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 24px;
+    line-height: 1;
+    text-align: center;
+    width: 100%;
+    margin-top: 20px;
 }
 
 .checkout-content h2 {

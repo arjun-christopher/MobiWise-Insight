@@ -39,17 +39,21 @@ function checkout() {
     });
 }
 
-function closeCheckoutModal() {
-    document.getElementById("checkout-modal").style.display = "none";
-}
-
-// Optional: Close on outside click
+// Close modal when clicking outside the content
 window.onclick = function(event) {
     const modal = document.getElementById("checkout-modal");
-    if (event.target == modal) {
-        closeCheckoutModal();
+    if (event.target === modal) {
+        modal.style.display = "none";
     }
-}
+};
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    const modal = document.getElementById("checkout-modal");
+    if (event.key === 'Escape' && modal.style.display === 'block') {
+        modal.style.display = 'none';
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("checkout-form");

@@ -528,9 +528,9 @@
         <!-- Checkout Modal -->
         <div id="checkout-modal" class="checkout-modal">
             <div class="checkout-content">
-                <span class="close-checkout" onclick="closeCheckoutModal()">&times;</span>
-                <h2>Checkout</h2>
-
+                <div class="checkout-header">
+                    <h2>Checkout</h2>
+                </div>
                 <form id="checkout-form">
                     <br>
 
@@ -690,4 +690,5 @@
     <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
     <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script>
 </body>
+
 </html>
