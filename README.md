@@ -97,7 +97,6 @@ MobiWise Insight is a comprehensive platform for mobile management, e-commerce, 
 - Offline access to recently viewed products
 
 ### 🤖 AI-Powered Recommendations
-- Personalized mobile suggestions based on browsing history
 - Price drop alerts for wishlisted items
 - Smart search with natural language processing
 
