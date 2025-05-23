@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='compare_styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home_styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <script>
@@ -39,7 +40,7 @@
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search Mobiles"
                 onclick="window.location.href='/all-mobiles'">
-            <button id="search-btn">🔍</button>
+            <button id="search-btn"><i class="fa-brands fa-searchengin"></i></button>
         </div>
         <div id="cart-container">
             <i id="cart-icon" class="fas fa-shopping-cart" onclick="window.location.href='/cart'"></i>
@@ -91,6 +92,11 @@
             <h2>Comparison Outcome</h2>
         </div>
         <table id="comparison-outcome" class="comparison-outcome"></table>
+
+        <br>
+        <h2 id="chart_head" style="display:none;">Comparison Graph</h2>
+        <canvas id="featureWinsChart" width="400" height="400" style="margin: 0 auto;"></canvas>
+        <div id="feature-breakdown" style="margin-top: 30px; max-width: 800px; margin-inline: auto;"></div>
 
         <br>
         <div id="suggestion-result"></div>
@@ -210,6 +216,112 @@
                             </div>
                         </div>`;
                 }
+
+                // ✅ Feature Win Chart Logic
+                document.getElementById("chart_head").style.display = "block";
+                const featureCounts = {};
+                const featureMap = {};
+
+                // ✅ Properly split combined winners and validate models
+                comparisons.forEach(c => {
+                    let rawModels = [];
+
+                    if (Array.isArray(c.best_model)) {
+                        rawModels = c.best_model;
+                    } else if (typeof c.best_model === "string") {
+                        rawModels = c.best_model.split(/\/|&|,/).map(m => m.trim());
+                    }
+
+                    rawModels.forEach(model => {
+                        // ✅ Only include valid models from mobileData
+                        const isValid = mobileData.some(m => m.Model === model);
+                        if (!isValid || !model) return;
+
+                        featureCounts[model] = (featureCounts[model] || 0) + 1;
+                        if (!featureMap[model]) featureMap[model] = [];
+                        featureMap[model].push(c.feature);
+                    });
+                });
+
+                const ctx = document.getElementById("featureWinsChart").getContext("2d");
+                if (window.featureChart) window.featureChart.destroy();
+
+                window.featureChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(featureCounts),
+                        datasets: [{
+                            label: "Feature Wins",
+                            data: Object.values(featureCounts),
+                            backgroundColor: [
+                                '#0077b6', '#00b4d8', '#90e0ef', '#caf0f8',
+                                '#f9c74f', '#f9844a', '#f94144', '#43aa8b'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                            duration: 1500,
+                            easing: 'easeOutBounce'
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const model = context.label;
+                                        const count = context.formattedValue;
+                                        const features = featureMap[model] || [];
+                                        return [
+                                            `${model}`,
+                                            `Features Won: ${count}`
+                                        ];
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'bottom'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Which Mobile Wins More Features?'
+                            }
+                        }
+                    }
+                });
+
+                const breakdownContainer = document.getElementById("feature-breakdown");
+                breakdownContainer.innerHTML = '<h4 style="font-size: 1.2em; margin-bottom: 10px;">Feature Wins by Model</h4>';
+
+                Object.entries(featureMap).forEach(([model, features]) => {
+                    breakdownContainer.innerHTML += `
+                        <div style="margin-bottom: 20px;">
+                            <strong>${model}</strong>
+                            <div class="feature-tags" style="
+                                display: flex;
+                                gap: 6px;
+                                margin-top: 8px;
+                                background-color: #f9f9f9;
+                                padding: 10px;
+                                border-radius: 8px;
+                            ">
+                                ${features.map(f => `<span style="
+                                    background-color: var(--light-blue);
+                                    padding: 6px 12px;
+                                    border-radius: 16px;
+                                    font-size: 14px;
+                                    color: white;
+                                    white-space: nowrap;
+                                ">${f}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+
             } catch (err) {
                 console.error("Error fetching comparison:", err);
                 alert("Something went wrong while fetching shared comparison.");
@@ -218,6 +330,9 @@
 
         fetchSharedComparison();
     </script>
-</body>
 
+    <script src="{{ url_for('static', filename='scrollToTopOnLoad.js') }}"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
 </html>

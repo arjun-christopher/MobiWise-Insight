@@ -185,6 +185,123 @@ async function compareMobiles() {
             `;
         }
 
+        // ✅ 4. Build Pie Chart from Feature Wins
+        document.getElementById("chart_head").style.display = "block";
+        const featureCounts = {};
+        const featureMap = {};
+        
+        comparisons.forEach(c => {
+            let rawModels = [];
+        
+            // ✅ If best_model is array, use as is
+            if (Array.isArray(c.best_model)) {
+                rawModels = c.best_model;
+            } else if (typeof c.best_model === "string") {
+                // ✅ Split combined string by known separators
+                rawModels = c.best_model.split(/\/|&|,/).map(m => m.trim());
+            }
+        
+            // ✅ Filter out invalid entries (e.g., chipset names, empty strings)
+            rawModels.forEach(model => {
+                // Only allow known models present in `data.mobiles`
+                const isValidModel = data.mobiles.some(m => m.Model === model);
+
+                if (!isValidModel || !model) return;
+
+        
+                featureCounts[model] = (featureCounts[model] || 0) + 1;
+                if (!featureMap[model]) featureMap[model] = [];
+                featureMap[model].push(c.feature);
+            });
+        });
+        
+        
+        // Prepare chart data
+        const labels = Object.keys(featureCounts);
+        const dataValues = Object.values(featureCounts);
+
+        // Chart Setup with Custom Tooltip
+        const ctx = document.getElementById("featureWinsChart").getContext("2d");
+        if (window.featureChart) window.featureChart.destroy(); // clear previous
+
+        window.featureChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(featureCounts),
+                datasets: [{
+                    label: "Feature Wins",
+                    data: Object.values(featureCounts),
+                    backgroundColor: [
+                        '#0077b6', '#00b4d8', '#90e0ef', '#caf0f8',
+                        '#f9c74f', '#f9844a', '#f94144', '#43aa8b'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1500,
+                    easing: 'easeOutBounce'
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                const model = context.label;
+                                const count = context.formattedValue;
+                                const features = featureMap[model] || [];
+                                return [
+                                    `${model}`,
+                                    `Features Won: ${count}`
+                                ];
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Which Mobile Wins More Features?'
+                    }
+                }
+            }
+        });
+
+        // ✅ 5. Feature Breakdown Section (Responsive Tags Layout)
+        const breakdownContainer = document.getElementById("feature-breakdown");
+        breakdownContainer.innerHTML = '<h4 style="font-size: 1.2em; margin-bottom: 10px;">Feature Wins by Model</h4>';
+
+
+        Object.entries(featureMap).forEach(([model, features]) => {
+            breakdownContainer.innerHTML += `
+                <div style="margin-bottom: 20px;">
+                    <strong>${model}</strong>
+                    <div class="feature-tags" style="
+                        display: flex;
+                        gap: 6px;
+                        margin-top: 8px;
+                        background-color: #f9f9f9;
+                        padding: 10px;
+                        border-radius: 8px;
+                    ">
+                        ${features.map(f => `<span style="
+                            background-color: var(--light-blue);
+                            padding: 6px 12px;
+                            border-radius: 16px;
+                            font-size: 14px;
+                            color: white;
+                            white-space: nowrap;
+                        ">${f}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
         document.getElementById("create-link-btn").style.display = "inline-block";
 
 
