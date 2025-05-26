@@ -985,9 +985,6 @@ def order_history():
     token = request.cookies.get("jwt")
     user_data = decode_token(token) if token else None
 
-    if not user_data:
-        return redirect("/")
-
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT UserID FROM Users WHERE Username = ?", (user_data["username"],))
