@@ -220,8 +220,5 @@ If you have any questions about which values to replace or best practices for se
 - Store sensitive data (DB credentials, API keys) in environment variables
 - JWT is used for authentication and session management
 
-## License
-This project is for educational purposes. For commercial use, contact the author.
-
 ---
-_Last updated: 2025-05-23_
+_Last updated: 27-05-2025_
